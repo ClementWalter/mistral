@@ -123,6 +123,11 @@ MonteCarlo = function(dimension,
     q <- -q
   }
   
+  if(plot==TRUE & dimension>2){
+    message("Cannot plot in dimension > 2")
+    plot <- FALSE
+  }
+  
   if(verbose>0){cat(" * STEP 1 : FIRST SAMPLING AND ESTIMATION \n")}
   Nrem = min(N_max - Ncall, N_batch)
   if(verbose>1){cat("   - Generate N_batch = ",Nrem," standard samples\n")}

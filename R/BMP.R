@@ -138,6 +138,11 @@ BMP <- function(dimension,
     if(!missing(y)) y = -1*y
   }
 
+  if(plot==TRUE & dimension>2){
+    message("Cannot plot in dimension > 2")
+    plot <- FALSE
+  }
+  
   # set default values for SUR if missing
   if(is.null(sur$approx)) sur$approx = FALSE
   if(is.null(sur$approx.pnorm)) sur$approx.pnorm = FALSE

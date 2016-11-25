@@ -138,6 +138,11 @@ SubsetSimulation = function(dimension,
     q <- -q
   }
   
+  if(plot==TRUE & dimension>2){
+    message("Cannot plot in dimension > 2")
+    plot <- FALSE
+  }
+  
   if(verbose>0){cat("  * Generate the first N =",N,"samples by crude MC \n")}
   Utot <- U <- matrix(rnorm(dimension*N), nrow = dimension, dimnames = list(rep(c('x', 'y'), ceiling(dimension/2))[1:dimension]))
   

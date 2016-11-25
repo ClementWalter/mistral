@@ -147,6 +147,11 @@ S2MART = function(dimension,
     failure <- -failure
   }
   
+  if(plot==TRUE & dimension>2){
+    message("Cannot plot in dimension > 2")
+    plot <- FALSE
+  }
+  
   i = 0;			# Subset number
   y0 = Inf;		# first level
   y = NA;			# will be a vector containing the levels

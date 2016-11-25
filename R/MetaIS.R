@@ -255,6 +255,11 @@ MetaIS = function(dimension,
     failure <- -failure
   }
   
+  if(plot==TRUE & dimension>2){
+    message("Cannot plot in dimension > 2")
+    plot <- FALSE
+  }
+  
   # plotting part
   if(plot==TRUE){
     

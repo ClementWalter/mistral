@@ -127,6 +127,11 @@ MP = function(dimension,
   # Fix NOTE issue with R CMD check
   k <- NULL
   
+  if(plot==TRUE & dimension>2){
+    message("Cannot plot in dimension > 2")
+    plot <- FALSE
+  }
+  
   # Define transpose for list of lists with same fields, eg output of foreach
   t.list <- function(l){
     lapply(split(do.call("c", l), names(l[[1]])), unname)

@@ -33,6 +33,11 @@ BSS = function(d, # dimension
     x <- t(qnorm(u))
     lsf(x)
   }
+  
+  if(plot==TRUE & dimension>2){
+    message("Cannot plot in dimension > 2")
+    plot <- FALSE
+  }
 
   if(missing(K)){
     K = function(x,g){
