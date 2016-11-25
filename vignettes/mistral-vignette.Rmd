@@ -1,0 +1,457 @@
+---
+title: "Using mistral for reliability analysis"
+author: "Clément Walter"
+date: '`r Sys.Date()`'
+output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{Using mistral for reliability analysis}
+  %\VignetteEngine{rmarkdown::render}
+  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
+  \DeclareUnicodeCharacter{00A0}{ }
+---
+
+```{r, cache=FALSE, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(fig.path='figure/',
+               cache.path='cache/',
+               cache=TRUE)
+
+knitr::opts_knit$set(animation.fun = hook_scianimator)
+```
+The package `mistral` provides some numerical methods for estimating the probability that a computer code exceeds a given threshold when its input parameters are random with a known distribution. In this vignette we give an overview of the available methods as well as some practical testcases to clarify both how to use them and what they do.
+
+## General setting
+
+Given an input random vector $\mathbf{X}$ with known distribution and a real-valued function $g$ standing for the computer code, the general problem addressed in this package is to estimate the quantity:
+$$
+p = P[g(\mathbf{X}) > q]
+$$
+with $p$ or $q$ a given real:
+
+* either $q$ is given and the goal is to estimate the probability $p$; in this setting $q$ is for instance a security threshold and one wants to estimate the probability that the code be greater than this value.
+* or $p$ is given and the goal is to find the corresponding threshold such that the probability of failure is lower than required.
+
+### The standard input space
+By definition, we call the standard input space the case where $\mathbf{X}$ is a standard Gaussian vector, ie. a vector with independent standard Gaussian coordinates. **All the stochastic methods are developed for standard Gaussian input space.** In other words, when the problem at hand does not use only independent standard Gaussian random variables, an iso-probabilistic transformation has to be done before a call to the code `g`, often called the limit-state function `lsf`.
+
+`mistral` provides a way to perform such transformations for model using correlated inputs with usual distributions. In the following the original vector is denoted by $\mathbf{X}$ while its conterpart in the standard space is denoted by $\mathbf{U}$. The two functions `mistral::UtoX` and `mistral::XtoU` let go from one representation to the other.
+
+Let us detail the use of `UtoX` (and similarly of `XtoU`). The supported distributions are:
+
+* Normal: defined by its mean and standard deviation
+* Lognormal: defined by its internal parameters `P1=meanlog` and `P2=sdlog` (see `*lnorm` help page)
+* Uniform: defined by its internal parameters `P1=min` and `P2=max` (see `*unif` help page)
+* Gumbel: defined by its internal parameters `P1` and `P2`
+* Weibull: defined by its internal parameters `P1=shape` and `P2=scale` (see `*weibull` help page)
+* Gamma: defined by its internal parameters `P1=shape` and `P2=scale` (see `*gamma` help page)
+* Beta: defined by its internal parameters `P1=shape1` and `P2=shape2` (see `*beta` help page)
+ 
+Let us define for instance a random vector $\mathbf{X}$ in 2d such that its coordinates are standard Gaussian:
+```{r}
+distX1 <- list(type='Norm',  MEAN=0.0, STD=1.0, P1=NULL, P2=NULL, NAME='X1')
+distX2 <- list(type='Norm',  MEAN=0.0, STD=1.0, P1=NULL, P2=NULL, NAME='X2')
+input.margin <- list(distX1,distX2)
+```
+and correlated $cor(X_1, X_2) = 0.5$:
+```{r}
+input.Rho    <- matrix( c(1.0, 0.5,
+                          0.5, 1.0),nrow=2)
+input.R0     <- mistral::ModifCorrMatrix(input.Rho)
+L0           <- t(chol(input.R0))
+```
+then the function `UtoX` writes:
+```{r}
+U <- rnorm(2)
+U <- cbind(U, U)
+X <- mistral::UtoX(U, input.margin, L0)
+X
+```
+The function `UtoX` works with vectors or matrices and always returns a matrix. Eventually the limit-state function can be defined by:
+```{r}
+lsf_U = function(U) {   
+    X <- mistral::UtoX(U, input.margin, L0)
+    lsf(X)
+}
+```
+
+### Defining a proper limit-state function $g$
+All the methods implemented in `mistral`  require that $g$ be a function taking a matrix as input and returning a vector as ouput. Indeed, in order to allow for parallel computing, batches of points to be evaluated are given as a matrix of column vectors. Hence, depending on the processing capaiblities and/or the implementation, computation of the model $g$ on the points $\mathbf{X}$ can be made a lot faster.
+
+Let us define an easy 2-dimensional function:
+```{r}
+lsf <- function(x){
+  x[1] + x[2]
+}
+```
+This function can be called onto a vector:
+```{r}
+x <- c(1,2)
+lsf(x)
+```
+or a matrix:
+```{r}
+x <- as.matrix(x)
+lsf(x)
+```
+However, one wants it to be able to address matrices with several columns representing different points:
+```{r}
+x <- cbind(x,x)
+lsf(x)
+```
+obviously does not provide the expected result. There are indeed several possibilities to make the example fit into this framework. In this simple case, one has an analytical expression of the function. This can arise when using the package for educational/illustrative purpose. An easy way to fix that is then to redefine the function with `x` as a matrix:
+```{r}
+lsf <- function(x) {
+  x[1,] + x[2,]
+}
+lsf(x)
+```
+Note here that the function considers each **column** as a point. This is to be consistent with the default behaviour of `as.matrix` function:
+```{r}
+x <- 1:2
+as.matrix(x)
+```
+Now looking back at our function, one has:
+```{r, error=TRUE}
+x <- cbind(x,x)
+lsf(x[,1])
+```
+The function returns an error because default R behaviour is to drop the dimensions when selecting only one column. All together, a robust way to define a function is to apply first `as.matrix`:
+```{r}
+lsf <- function(x) {
+  x <- as.matrix(x)
+  x[1,] + x[2,]
+}
+lsf(x[,1])
+```
+
+In general (practical) settings, no analytique expression is available. Let us denote by `myCode` the given computer code. `myCode` is supposed to be able to be called onto a vector. Then the `apply` function can be used:
+```{r}
+lsf <- function(x){
+  x <- as.matrix(x)
+  apply(x, 2, myCode)
+}
+```
+
+When parallel computing is availble, it is then possible to make a parallel calculation of a batch of points given as a matrix. Let us give an example using the [`foreach`](https://cran.r-project.org/package=foreach) and [`iterators`](https://cran.r-project.org/web/packages/iterators/index.html) packages (we recommand the user to read the very nice [vignette](https://cran.r-project.org/web/packages/foreach/vignettes/foreach.pdf) to get started with the `foreach` loop, which is useful not only for parallel computing but also as a nice alternative to the `*apply` family).
+```{r}
+require(foreach)
+lsf <- function(x){
+  x <- as.matrix(x)
+  foreach(x = iterators::iter(x, by = 'col'), .combine = 'c') %dopar% {
+    myCode(x)
+  }
+}
+```
+
+## Short tutorial for using parallel computation with `foreach`
+
+In the previous section we have shown how to use the `foreach` loop to define a well-suited function for using parallel computation. Indeed, `foreach` requires the initilisation of a parallel backend to run _effectively_ in parallel. For instance, using the above code without further initilisation will issue a `Warning`:
+```{r, warning=TRUE}
+myCode <- function(x) x[1] + x[2]
+x <- 1:2
+lsf(x)
+```
+
+Basically, a parallel backend can be understood as a way of defining what _parallel_ means for the (master) R session. The simplest, and not of great interest, backend is the _sequential_ one:
+```{r}
+foreach::registerDoSEQ()
+```
+lets tell R that _parallel_ means indeed usual sequential computation. However the interest of parallel computation is to run _simultaneously_ several tasks.
+
+With R, the management of these _parallel_ tasks is let to the task manager of the used computer. In other words, **initialising a parallel backend with R is only a easy way to launch several R sessions and to make them communicate**. This means that there is no theoretical requirement to initialise a backend with a number of parallel _workers_ equal to the number of physical cores of the machine. Eventually if more parallel tasks than real cores are initialised, the management of the tasks is let to the native task manager while if less workers are initialised, the `foreach` loop distributes the computational load.
+
+There are two main possible frameworks for parallel computing: OpenMP and MPI. Without digging to much into the details, OpenMP lets you use the several cores of one given _computer_ (one shared memory) while MPI allows for using several computers connected with a bus.
+
+Let us first focus on OpenMP. Depending on the OS of the workstation (Windows or Mac/Linux), you can use either [`doSNOW`](https://cran.r-project.org/web/packages/doSNOW/index.html)  or [`doMC`](https://cran.r-project.org/web/packages/doMC/doMC.pdf). SNOW (Simple Network of Workstations) is available for both Windows and Unix OS. It requires to first create a cluster with base package `parallel::makeCluster()`. This means that the subsequent R sessions (slave sessions in parallel terminology) are created once for all in the beginning. It is like opening several R session by hand: looking at your task manager you will see as many R processes as the size of the requested cluster.
+```{r}
+# return the number of cores of the computer
+n <- parallel::detectCores()
+# default behaviour if n not specified explained in the help page
+cl <- parallel::makeCluster(n)
+doSNOW::registerDoSNOW(cl)
+
+# Control that everything is set properly
+foreach::getDoParName()
+foreach::getDoParWorkers()
+```
+In the end, the cluster has to be closed with:
+```{r}
+parallel::stopCluster(cl)
+```
+The other option for Unix OS is `doMC`. The main difference is that the cluster is made by _forking_ the current master session, ie. that the sub-sessions are a copy of the current session, including all the variables defined in the `.GlobalEnv`. It is easier to initialise and more robust (SNOW can miss variable even though `foreach` tries an automatic export of the necessary ones):
+```{r}
+doMC::registerDoMC(n)
+# Control that everything is set properly
+foreach::getDoParName()
+foreach::getDoParWorkers()
+```
+Here there is no need to close the cluster because it is created on-the-fly for each instance of the `foreach` loop.
+
+The initialisation of an MPI backend is rather similar to the one the SNOW backend:
+```r
+# instead of parallel::detectCores() to see the available number of MPI threads
+Rmpi::mpi.universe.size() 
+cl <- doMPI::startMPIcluster()
+doMPI::registerDoMPI(cl)
+```
+and similarly in the end:
+```r
+doMPI::closeCluster(cl)
+Rmpi::mpi.quit()
+```
+The interested reader is referred to the vignettes of the above mentionned packages for further explanations.
+
+## Statistical methods for uncertainty quantification
+In this section, we describe the _purely_ statistical methods proposed in `mistral` for uncertainty quantification. Indeed the uncertainty quantification problem is twofold:
+
+* is there an analytical formula for the sought probability?
+* is it possible to use the _real_ model `myCode` or is it necessary to build a _surrogate_ model?
+The statistical methods aim at solving the first issue, ie. at estiamting the probability when no analytical expression is found.
+
+### Crude Monte Carlo method
+The crude Monte Caro method is based on the Strong Law of Large Numbers. Basically it makes an average of independent and identically distributed (iid) samples. A basic way to implement it could be:
+```{r}
+X <- matrix(rnorm(2e5), nrow = 2) # generate 1e5 standard Gaussian samples
+Y <- mistral::kiureghian(X) # evaluate to model to get 1e5 iid samples
+q <- 0 # define the threshold
+(p <- mean(Y<q)) # estimate P[g(X)<0]
+```
+
+The function `mistral::MonteCarlo` is a wrap-up of this simple algorithm. However, instead of specifying a given number of samples, it works iteratively by adding `N_batch` samples per iteration until a target precision `precision` on the probability estimation is reached (usually a coefficient of variation of 5 or 10\%) or `N_max` samples have been simulated.
+```{r}
+mc <- mistral::MonteCarlo(dimension = 2, lsf = mistral::kiureghian, N_max = 1e5, q = q,
+                          # these first parameters are exactly the one used above
+                           N_batch = 1e4) # define the batch size
+```
+In this latter example, the target precision is not reached but the algorithm stopped because of the limit given by `N_max`. It is possible to set `N_max=Inf`:
+```{r}
+mc <- mistral::MonteCarlo(dimension = 2, lsf = mistral::kiureghian, N_max = Inf, q = q,
+                           N_batch = 1e4, # define the batch size
+                           verbose = 1) # control the level of log messages
+```
+and total number of calls (simulated samples) is $`r mc$Ncall`$.
+
+As for the base _cdf_ functions `p****` (`pnorm, plnorm, punif...`) the statistical methods of `mistral` integrate a `lower.tail` parameter specifying which tail is to be estimated:
+
+* `lower.tail = TRUE` means that one estimates $P[g(X) < q]$
+* `lower.tail = FALSE` means instead $P[g(X) > q]$
+
+For illustrative purpose it is also possible to plot the contour of the limit-state function. All `mistral` functions let draw samples and contour with `ggplot2` functions even though this can be quite memory and time demanding:
+```{r}
+mc <- mistral::MonteCarlo(dimension = 2, lsf = mistral::kiureghian, N_max = 1e4, q = q,
+                           N_batch = 1e4, # define the batch size
+                           plot = TRUE)
+```
+
+The `MonteCarlo` method also returns the empirical cdf of the real-valued random variable $Y = g(\mathbf{X})$ (similarly to the base `stats::ecdf` function):
+```{r}
+require(ggplot2)
+y = seq(-5, 10, l = 200)
+ggplot(data.frame(y=y, ecdf = mc$ecdf(y)), aes(y,ecdf)) + geom_line()
+```
+
+### Subset Simulation method
+
+As visible in the Monte Carlo method plot, this method is quite inefficient because it samples a lot in the safety domain (the red dots). To circumvent this limitation, the splitting method, also called _Subset Simulation_ and implemented as `mistral::SubsetSimulation` works iteratively on the threshold $q$. Instead of trying to estimate directly $P[g(X) < q]$ it creates a sequence of intermediate thresholds $(q_i)$ such the **conditional probabilities are not too small**. Hence, instead of simulating new iid `N_batch` it resamples the `N_batch` using Markov Chain drawing conditionally to be greater than a threshold defined as the `p_0` empirical quantile of the previous batch.
+```{r, fig.keep='all', fig.show='animate'}
+ss <- mistral::SubsetSimulation(dimension = 2, lsf = mistral::kiureghian, q = 0,
+                                N = 1e4,
+                                plot = TRUE)
+```
+Note here that the total number of calls `Ncall` is much bigger than `3 x N`. Indeed the conditional sampling with Markov Chain drawing requires to retain only one over `burnin = 20` samples. In the end in this example it makes a total of $10^4 + 2 \times 20 \times 10^4 = 410000$. As a matter of fact a naive Monte Carlo estimator with the same computational budget (ie. $410000$ samples) would have produced an estimator with a coefficient of variation:
+$$
+cov \approx \sqrt{\dfrac{1}{p \times 410000}} = `r sqrt(1/ss$p/ss$Ncall)`
+$$
+As a rule of thumbs when the sought probability is greater than $10^{-3}$ it is more efficient to use a crude Monte Carlo method than a advanced _Splitting_ method^[this rule depends on the `burnin` parameter.].
+
+### Moving Particles
+
+In the usual Subset Simulation method the cutoff probability for defining the intermediate thresholds is set to `p_0 = 0.1`. Hence at a given iteration `N` samples are generated conditionally greater than this empirical quantile. However, it has been shown that it is statistically optimal (total number of generated samples against coefficient of variation of the final estimator) to resample these `N` _particles_ according to **their own level**. It means that instead of using the $N-$sample $(Y_i)_{i=1}^N = (g(\mathbf{X}_i))_{i=1}^N$ to estimate a `p_0` quantile for $Y$, each $\mathbf{X}_i$ is resampled conditionally to be greater than $Y_i$.
+
+More precisely, the Moving Particle method aims at simulating independent and identically distributed (iid) realisations of a given random walk over the real-valued output $Y = g(\mathbf{X})$. This random walk is defined as follows: $Y_0 = -\infty$ and
+$$
+Y_{n+1} \sim Y | Y > Y_n
+$$
+In other words, each element is generated conditionally greater than the previous one. This random walk is a Poisson process and lets build true counterparts of the crude Monte Carlo estimators of a probability, a quantile or the _cdf_ of $Y$. 
+
+Since the algorithm generates iid realisations of such a random walk, it is especially suited for using with parallel computing. Hence the code includes a `foreach` loop and will directely benefit from a parallel backend.
+
+```{r}
+mp <- mistral::MP(dimension = 2,  lsf = mistral::kiureghian, q = 0, N = 1e2)
+```
+One can compare this result with the one got from `SubsetSimulation` in terms of coefficient of variation against total number of calls.
+```{r}
+ss$cov^2*ss$Ncall / (mp$cov^2*sum(mp$Ncall))
+```
+
+The `MP` method not only returns an estimation of the sought probability $p$ but also an empirical _cdf_ of $Y = g(\mathbf{X})$ over the interval $[q, \infty)$ (with `lower.tail = TRUE`, the complementary _cdf_ over $(-\infty, q]$ otherwise).
+```{r}
+y = seq(0, 10, l = 200)
+ggplot(data.frame(y=y, ecdf = mp$ecdf(y)), aes(y,ecdf)) + geom_line()
+```
+
+The empirical _cdf_ is vectorized over `q` and returns a `NA` when the value is not in the right interval.
+It can also be used to estimate a quantile:
+```{r}
+mp <- mistral::MP(dimension = 2,  lsf = mistral::kiureghian, p = mp$p, N = 1e2)
+```
+This latter estimation also enables parallel computation but in a 2-step algorithm. The empirical _cdf_ is estimated until the farthest _state_ reached by the iid random walks. Note also that the condifence interval requires to run the algorithm a little but longer and thus is optional: default parameter `compute_confidence = FALSE`.
+```{r}
+mp <- mistral::MP(dimension = 2,  lsf = mistral::kiureghian, p = mp$p, N = 1e2,
+                  compute_confidence = TRUE)
+```
+Finally, the conditional sampling for the `MP` method also requires Markov Chain drawing and the same disclaimer as for the `SubsetSimulation` applies: this method is really worth for $p \leq 10^{-3}$.
+
+## Metamodel based algorithms
+
+In the previous section, we have shown some statistical tools to estimate probability, quantile and _cdf_ with a given function $g$. However, these statistics still require a lot a calls to the model $g$. Thus it may be necessary to approximate it, ie. to _learn_ it with some of its input-output couples $(\mathbf{X}_i, Y_i)_i$.
+
+In `mistral` there are basically three types of metamodel implemented:
+
+* linear model: the `FORM` method _replaces_ the model $g$ with a hyperplane crossing the so-called _Most Probable Failure Point_. This point is, in the standard space, the failing sample the closest to the origin.
+* Support-Vector Machine (SVM): this classifier is used in the `S2MART` method and relies on the [`e1071::svm`](https://cran.r-project.org/web/packages/e1071/index.html) function.
+* Gaussian process regession; this is used in `MetaIS`, `AKMCS` and `BMP`. Here the model $g$ is _replaced_ by a Gaussian random process with known distribution. The regression is carried out using the [DiceKriging](http://cran.r-project.org/web/packages/DiceKriging/index.html) package.
+
+### Short tutorial on the metamodels used
+
+#### Support-Vector Machine
+
+A Support-Vector Machine is a surrogate model which aims at **classifying** the samples of the input space according to some labels attached on it. In our context the label is straightforward: failing or safety domain. From a bunch of input-outputs couples, it builds a frontier and lets classify any new sample $\mathbf{X}$.
+
+When talking about SVM, one often makes mention of the _kernel trick_. Indeed the SVM was initially build as a linear classifier, ie that it looked for an hyperplane separating the input space into two subspaces, each one being related to a given label. However this was far too constraining. The use of a kernel instead of the natural inner product lets build more complex non-linear classifiers.
+```{r}
+require(e1071)
+X <- data.frame(x1 = rnorm(100), x2 = rnorm(100))
+Y <- rowSums(X^2)
+(svm.model <- svm(X, (Y>1), type = "C-classification"))
+predict(svm.model, data.frame(x1=rnorm(1), x2=rnorm(1)))
+```
+The interested reader is referred to the [`e1071::svm` vignette](https://cran.r-project.org/web/packages/e1071/vignettes/svmdoc.pdf) for more details about SVM.
+
+#### Kriging
+
+Kriging refers to the case where the computer code $g$ is seen as a specific realisation of a random process with known distribution.
+
+In computer experiement, this random process is always supposed to be Gaussian. Furthermore, the parameters of the random process covariance are usually estimated with a plug-in approach: in a first step the model is fitted with some data (with Maximum Likelihood Estimation of Cross-Validation for instance). Then they are supposed to be known and thus the distribution of the process at any point $\mathbf{x}$ is Gaussian with known mean and variance.
+
+These quantities are referred to as the kriging mean and the kriging variance. While the first one usually serves as a cheap surrogate model for $g$, the second one lets characterise the _precision_ of the prediction. Especially Kriging interpolates the data: the kriging variance at known location is 0.
+```{r}
+require(DiceKriging)
+X <- data.frame(x1 = rnorm(100), x2 = rnorm(100))
+Y <- rowSums(X^2)
+km.model <- km(design = X, response = Y)
+x.new <- data.frame(x1=rnorm(1), x2=rnorm(1))
+print(sum(x.new^2))
+predict(km.model, x.new, type = "UK")[c('mean', 'sd')]
+```
+
+### The `FORM` method
+
+The `mistral::FORM` function always tries to estimate $P[g(\mathbf{X}) < 0]$ with $\mathbf{X}$ in the standard space. As for statistical methods, `mistral::UtoX` can be used to transform the original limit-state function onto a suitable one.
+
+Furthermore the limit-state function may have to be modified to fit the used framework: say for instance that one wants to estimate $P[g(\mathbf{X}) > q]$, then one should define:
+```r
+lsf.FORM = function(x) {
+   q - g(x)
+}
+```
+
+The `FORM` function requires two parameters: a starting point for the research of the Most Probable Failing Point `u.dep` and a total number of calls `N.calls`:
+```{r}
+form <- mistral::FORM(dimension = 2, mistral::kiureghian, N.calls = 1000, u.dep = c(0,0))
+form$p
+```
+
+Th FORM method gives an analytical expression of the sought probability replacing the true model $g$ with the found hyperplane. However, `mistral::FORM` also implements an Importance Sampling scheme. Instead of using this ready-made formula, it makes an IS estimation with a Gaussian standard proposal distribution centred at the MPFP.
+```{r}
+form.IS <- mistral::FORM(dimension = 2, mistral::kiureghian, N.calls = 1000,
+                         u.dep = c(0,0),
+                         IS = TRUE)
+form.IS$p
+```
+In this latter case, the variance and the confidence interval at 95\% are given in output. Note however that the estimated variance may be far from the real one.
+
+### The `MetaIS` method
+
+`MetaIS`, for Metamodel-based Importance Sampling, is another metamodelling technique using a surrogate model in addition to an importance sampling scheme. Here, instead of using the input distribution only re-centred at the MPFP, the optimal (zero-variance) importance distribution is approximated with a Kriging-based surrogate model.
+
+More precisely, recall that the optimal distibution is given by:
+$$
+\pi(\mathbf{x}) = \dfrac{1_{g(\mathbf{x}) > q}}{P[g(\mathbf{X}) > q]}
+$$
+the _hard_ indicator function $1_{g(\mathbf{x}) > q}$ is _replaced_ by its kriging counterpart:
+$$
+\tilde{\pi}(\mathbf{x}) = P[\xi(\mathbf{x}) > q]
+$$
+where $\xi$ is the Gaussian process modelling the uncertainty on the computer code $g$. With the Gaussian hypothesis, its distribution is known.
+
+The algorithm is then twofold: first the Gaussian process is _learnt_, with means that input-output samples are calculated to get a conditional distribution of the process. Then a usual Importance Sampling scheme is run. The points added iteratively to the Design of Experiments (DoE) are chosen by clustering samples generated into the _margin_. When several calls to $g$ can be made in parallel, several points can then be added to the DoE simultaneously by chosing the number of cluster `K_alphaLOO` accordingly.
+
+The enrichment step stops either when the stopping criterion is reached or when the total given nummber of samples is simulated. Then few other calls to $g$ have to made for the Importance Sampling estimator.
+
+```{r, fig.keep="all", fig.show="animate"}
+metais <- mistral::MetaIS(dimension = 2, lsf = mistral::waarts, N = 3e5, K_alphaLOO = 5,
+                          plot = TRUE)
+```
+
+### The `AKMCS` method
+
+AKMCS, for Active learning using Kriging an Monte Carlo Simulation, is an other kriging-based approach. Instead of using the Gaussian process to define a Importance density, it uses the Kriging mean as a cheap surrogate for the computer code $g$ in a crude Monte Carlo estimator.
+
+The originality and the efficiency of the `AKMCS` method comes from the fact that it samples **from the beginning** the Monte Carlo population and then focus on _learning_ this population instead of the whole input space. The learning step is then an iterative search of the _more uncertain_ points.
+
+Note however that this discretisation makes the algorithm generating quite huge matrices and can lead to memory issues for extreme probabilities $p \leq 10^{ <- 5}$.
+
+```{r, fig.keep="all", fig.show="animate"}
+akmcs <- mistral::AKMCS(dimension = 2, lsf = mistral::waarts, N = 3e5, plot = TRUE, Nmax = 10)
+```
+
+### The `S2MART` method
+
+_S$^2$MART_, for Subset by Support vector Margin Algorithm for Reliability esTimation, is combination of a statistical technique called `Subset Simulation` (see above) and a learning approache based on Support Vector Machines.s
+
+The core concept is to used a _small_ population in the `Subset Simulation` algorithm in order to define the sequence of intermediate thresholds. But instead of estimating the conditional probability directly with the _iid_ population, it starts a learning algorithm based on SVM, originally called `SMART` on the current threshold. In the end, the conditional probability is estimated with the boundary predicted by the SVM instead of using the code $g$. Note that this original method, referred to as `SMART` is accessible directly by using the triple dot command: `mistral:::SMART` although it is not recommended by the author.
+
+This sequential approache allows this method to be used for extreme event, unlike `AKMCS` for instance. In the end, a lot of practical parameters can be set but default values are the ones set up by the author and should be modified very carefully as their meaning and impact is rather unclear.
+
+```{r, fig.keep="all", fig.show="animate"}
+smart <- mistral::S2MART(dimension = 2, lsf = mistral::waarts, failure = -2,
+                        k1 = 3, k2 = 5, k3 = 6,
+                        plot = TRUE)
+```
+
+### The `BMP` method
+
+The `BMP` method is a Bayesian version of the previous `MP` algorithm. Indeed, in this algorithm, the code $g$ is considered as a Gaussian random process $\xi$. Given a database of input-ouput couples, it is possible to estimate probability, quantile and moment of the _augmented_ real-valued random variable $Y = \xi(\mathbf{X})$:
+
+ * $\mathbf{X}$ is the random vector of intputs
+ * $\xi$ is a Gaussian random process embedding the uncertainty on the code $g$
+ * $Y | \mathbf{X}$ is a Gaussian random variable
+ * $P[Y > q] = \int_{\mathbb{X}} P[Y > q | \mathbf{X} = \mathbf{x}] d \mu^X (\mathbf{x})$
+ 
+For instance one can use the database created by the `AKMCS` method stored in the output `akmcs`:
+
+```{r}
+bmp <- mistral::BMP(dimension = 2, lsf = mistral::waarts, q = 0, N = 100,
+                    N.iter = 0, learn_db = akmcs$learn_db, y = akmcs$lsf_value)
+```
+
+The method can also be used, as the other one, to _learn_ the metamodel:
+```{r, fig.keep='all', fig.show="animate"}
+bmp <- mistral::BMP(dimension = 2, lsf = mistral::waarts, q = -4, N = 100,
+                    N.iter = 2, plot = TRUE)
+```
+
+In this latter case, the learning step is driven with the minimisation at each iteration of the integrated criterion $I$. This can be chosen with the argument `sur`. This integrated criterion is especially interesting when the sought probability is extreme. In this context, `BMP` is a preferred alternative to `S2MART`.
+
+Note also that the estimation of quantities $h$ and $I$ can also be done in `AKMCS` and `MetaIS` at each iteration with their parameter `sur=TRUE` (default is `sur=FALSE`) to monitor the learning of the Gaussian process and to compare the different learning strategies.
+
+### Conclusion
+In this vignette we wanted to present some of the methods implemented in `mistral` for reliability analysis. Precisely we focused on methods designed to estimate a probability of the code exceeding a given threshold.
+
+In this setting, all the statistical and/or metamodel-based algorithms have proven in some cases good efficiency. Amongst them, the `Moving Particles` and `Bayesian Moving Particles` are the only one not only focusing on the given threshold but delivering an uncertainty quantification for the random output _until_ this threshold.
+
+The interested reader is referred to the academic papers for a deeper understanding of the algorithms and to the package documentation for a comprehensive list of the involved parameters.
+```
+
