@@ -86,6 +86,9 @@ FORM <- function(dimension,
     plot <- FALSE
   }
   
+  # Fix check NOTE
+  x <- y <- z <- NULL
+  
   #------ Gradient------#
   GRAD <- function(func, X, f.X){
     

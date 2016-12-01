@@ -13,6 +13,9 @@ MetropolisHastings(x0, eval_x0 = -1, chain_length, modified = TRUE,
 
 \item{eval_x0}{the value of the limit-state function on \code{x0}}
 
+\item{chain_length}{the length of the Markov chain. At the end the chain
+will be chain_length + 1 long}
+
 \item{modified}{a boolean to use either the original Metropolis-Hastings
 transition kernel or the coordinate-wise one}
 
@@ -30,9 +33,6 @@ standard deviation sigma}
 
 \item{thinning}{a thinning parameter, ie that one sample over \code{thinning}
 samples is kept along the chain}
-
-\item{chain_lenght}{the length of the Markov chain. At the end the chain
-will be chain_length + 1 long}
 }
 \value{
 A list containing the following entries:

@@ -22,6 +22,9 @@ generateWithlrmM = function(seeds,
 	#VA_esp & VA_var are the esperance and the variance of the random variable VA_function(x)
 
 	tic = proc.time()[3]
+	
+	# Fix foreach NOTE
+	j <- NULL
 
 	# select only non duplicated seeds
 	seeds = as.matrix(seeds)

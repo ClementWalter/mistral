@@ -7,8 +7,10 @@ vignette: >
   %\VignetteIndexEntry{Using mistral for reliability analysis}
   %\VignetteEngine{rmarkdown::render}
   %\VignetteEncoding{UTF-8}
-  \usepackage[utf8]{inputenc}
-  \DeclareUnicodeCharacter{00A0}{ }
+header-includes:
+  - \usepackage[utf8]{inputenc}
+  - \DeclareUnicodeCharacter{00A0}{ }
+  - \usepackage{animate}
 ---
 
 ```{r, cache=FALSE, include=FALSE}
@@ -17,7 +19,7 @@ knitr::opts_chunk$set(fig.path='figure/',
                cache.path='cache/',
                cache=TRUE)
 
-knitr::opts_knit$set(animation.fun = hook_scianimator)
+# knitr::opts_knit$set(animation.fun = hook_scianimator)
 ```
 The package `mistral` provides some numerical methods for estimating the probability that a computer code exceeds a given threshold when its input parameters are random with a known distribution. In this vignette we give an overview of the available methods as well as some practical testcases to clarify both how to use them and what they do.
 

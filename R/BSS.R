@@ -34,7 +34,7 @@ BSS = function(d, # dimension
     lsf(x)
   }
   
-  if(plot==TRUE & dimension>2){
+  if(plot==TRUE & d>2){
     message("Cannot plot in dimension > 2")
     plot <- FALSE
   }

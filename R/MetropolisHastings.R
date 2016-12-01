@@ -22,7 +22,7 @@ MetropolisHastings = function(x0,
                               eval_x0=-1,
                               #' @param eval_x0 the value of the limit-state function on \code{x0}
                               chain_length,
-                              #' @param chain_lenght the length of the Markov chain. At the end the chain
+                              #' @param chain_length the length of the Markov chain. At the end the chain
                               #' will be chain_length + 1 long
                               modified = TRUE,
                               #' @param  modified a boolean to use either the original Metropolis-Hastings
@@ -66,9 +66,9 @@ MetropolisHastings = function(x0,
     candidate = rand(res$points[,i])
     
     if(modified) {
-      acceptance = pmin(lambda*dnorm(candidate)/dnorm(res$points[,i]),1)
+      acceptance = pmin(lambda*stats::dnorm(candidate)/stats::dnorm(res$points[,i]),1)
     } else {
-      acceptance = min(lambda*prod(dnorm(candidate)/dnorm(res$points[,i])),1)
+      acceptance = min(lambda*prod(stats::dnorm(candidate)/stats::dnorm(res$points[,i])),1)
     }
     test = rep(runif(acceptance) < acceptance, length.out = d)
     
