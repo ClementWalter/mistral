@@ -453,7 +453,9 @@ Note also that the estimation of quantities $h$ and $I$ can also be done in `AKM
 ### Conclusion
 In this vignette we wanted to present some of the methods implemented in `mistral` for reliability analysis. Precisely we focused on methods designed to estimate a probability of the code exceeding a given threshold.
 
-In this setting, all the statistical and/or metamodel-based algorithms have proven in some cases good efficiency. Amongst them, the `Moving Particles` and `Bayesian Moving Particles` are the only one not only focusing on the given threshold but delivering an uncertainty quantification for the random output _until_ this threshold.
+In this setting, all the statistical and/or metamodel-based algorithms have proven in some cases good efficiency, though some of them are quite time consumming. In this context it should be remembered that they are defined considering that the calls to the limit-state functions are the only important parts while it can appear indeed that all the _side computations_ take indeed much more time. The method should then be choosen accordingly. Especially in this vignette some parameters are very low to save computational time on laptop and should be increased for real experiments (see `S2MART` for instance).
+
+Amongst all the strategies proposed in this package, the `Moving Particles` and `Bayesian Moving Particles` are the only one not only focusing on the given threshold but delivering an uncertainty quantification for the random output _until_ this threshold. This means that the output is not a given probability but an estimation of the _cdf_ of the unknown real-valued random variable.
 
 The interested reader is referred to the academic papers for a deeper understanding of the algorithms and to the package documentation for a comprehensive list of the involved parameters.
 ```
