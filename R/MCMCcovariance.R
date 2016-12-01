@@ -36,7 +36,7 @@ MCMCcovariance = function(samples, n_seeds, chain_length, VA_function, VA_values
 	cat(" MC_gamma =",MC_gamma,"\n")
 
 	cat("#Calculate Monte-Carlo variance\n")
-	MC_var = 1/N*(VA_var+2*sum((seq(f=1,t=1,l=shift_max)-c(1:shift_max)*n_seeds/N)*R))
+	MC_var = VA_var*(1 + MC_gamma)/N
 	cat(" MC_var =",MC_var,"\n")
 
 	cat("#Calculate Monte-Carlo cov\n")

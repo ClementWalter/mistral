@@ -5,7 +5,7 @@
 #' 
 #' @aliases ss subset
 #' 
-#' @author Clement WALTER \email{clement.walter@cea.fr}
+#' @author Clement WALTER \email{clementwalter@icloud.com}
 #' 
 #' @details This algorithm uses the property of conditional probabilities on nested subsets
 #' to calculate a given probability defined by a limit state function.
@@ -100,8 +100,8 @@ SubsetSimulation = function(dimension,
                             #' K(X) should propose a matrix of candidate sample (same dimension as X) on which
                             #' \code{lsf} will be then evaluated and transition accepted of rejected. Default
                             #' kernel is the one defined K(X) = (X + sigma*W)/sqrt(1 + sigma^2) with W ~ N(0, 1).
-                            burnin = 20,
-                            #' @param burnin a burnin parameter for the the regeneration step.
+                            thinning = 20,
+                            #' @param thinning a thinning parameter for the the regeneration step.
                             save.all = FALSE,
                             #' @param save.all if TRUE, all the samples generated during the algorithms are saved
                             #' and return at the end. Otherwise only the working population is kept at each
@@ -209,7 +209,7 @@ SubsetSimulation = function(dimension,
     U <- G <- NULL
     acceptance.rate <- 0
     foreach::times(ceiling(N/sum(indG))) %do% {
-      foreach::times(burnin) %do% {
+      foreach::times(thinning) %do% {
         U_star <- K(U_tmp) # generate candidate
         G_star <- lsf(U_star) # calculate lsf
         if(save.all==TRUE){
@@ -225,7 +225,7 @@ SubsetSimulation = function(dimension,
       U <- cbind(U, U_tmp)
       G <- c(G, G_tmp)
     }
-    acceptance.rate <- acceptance.rate/burnin/N
+    acceptance.rate <- acceptance.rate/thinning/N
     if(acceptance.rate>0.4) sigma <- sigma*1.1
     if(acceptance.rate<0.2) sigma <- sigma*0.9
     sigma.hist <- c(sigma.hist, sigma)

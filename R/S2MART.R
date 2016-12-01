@@ -191,34 +191,37 @@ S2MART = function(dimension,
       print(p)
     }
     
-    
-    # cat("===========================================================================\n")
-    # cat(" STEP 1 : Subset Simulation part \n")
-    # cat("===========================================================================\n\n")
-    # 
+  # ===========================================================================
+  # Subset Simulation part \n")
+  # ===========================================================================
+  
+    # Create Monte Carlo population
     if(i==1){
       if(verbose>0){cat(" * Generate Nn =",Nn," standard gaussian samples\n")}
       U$Nn = matrix(rnorm(dimension*Nn, mean=0, sd=1),dimension,Nn)
     }
     else {
       if(verbose>0){cat(" * Generate Nn = ",Nn," points from the alpha*Nn points lying in F(",i-1,") with MH algorithm\n",sep="")}
-      U$Nn = generateWithlrmM(seeds=U$Nn[,G$Nn<y0],seeds_eval=G$Nn[G$Nn<y0],N=Nn,limit_f=meta_fun[[i-1]])$points
+      U$Nn = generateWithlrmM(seeds = U$Nn[,G$Nn<y0],
+                              seeds_eval = G$Nn[G$Nn<y0],
+                              N = Nn,
+                              limit_f = meta_fun[[i-1]])$points
     }
     
-    #assessment of g on these points
+    # Assessment of g on these points
     if(verbose>0){cat(" * Assessment of the LSF on these points\n")}
-    G$Nn = lsf(U$Nn);Ncall = Ncall + Nn
+    G$Nn = lsf(U$Nn); Ncall = Ncall + Nn
     
-    #Determination of y[i] as alpha-quantile of Nn points Un=U$Nn
+    # Determination of y[i] as alpha-quantile of Nn points Un=U$Nn
     if(verbose>0){cat(" * Determination of y[",i,"] as alpha-quantile of these samples\n",sep="")}
-    y0 <- y[i] <- getQuantile(data=G$Nn,alpha=alpha_quantile)
+    y0 <- y[i] <- getQuantile(data=G$Nn, alpha=alpha_quantile, failure=failure)
     
-    
-    #Add points U$Nn to the learning database
+    # Add points U$Nn to the learning database
     if(verbose>0){cat(" * Add points U$Nn to the learning database\n\n")}
     if(i==1) {
+      # first sample always the origin to insure consistency in the SVM classifier
       learn_db = cbind(seq(0,0,l=dimension),U$Nn)
-      g0 = lsf(as.matrix(seq(0,0,l=dimension)));Ncall = Ncall + 1;
+      g0 = lsf(as.matrix(seq(0,0,l=dimension))); Ncall = Ncall + 1;
       G$g = c(g0,G$Nn)
     }
     else {
@@ -232,38 +235,28 @@ S2MART = function(dimension,
       print(p)
     }
     
-    # cat("===========================================================================\n")
-    # cat(" STEP 2 : Metamodel algorithm part \n")
-    # cat("===========================================================================\n\n")
-    if(i==1){
-      arg = list(dimension=dimension,
-                 lsf=lsf,
-                 failure = y0,
-                 learn_db = learn_db,
-                 lsf_value = G$g,
-                 plot = plot,
-                 z_lsf = z_lsf,
-                 add = TRUE,
-                 output_dir = output_dir,
-                 verbose = verbose,...)
-      meta_step = do.call(SMART,arg)
+    # ===========================================================================
+    # STEP 2 : Metamodel algorithm part \n")
+    # ===========================================================================
+    
+    arg = list(dimension=dimension,
+               lsf=lsf,
+               failure = y0,
+               learn_db = learn_db,
+               lsf_value = G$g,
+               plot = plot,
+               z_lsf = z_lsf,
+               add = TRUE,
+               output_dir = output_dir,
+               verbose = verbose,...)
+    if(i>1){
+      arg = c(arg, list(
+        seeds = seeds,
+        seeds_eval = seeds_meta,
+        limit_fun_MH = meta_fun[[i-1]]
+      ))
     }
-    else{
-      arg = list(dimension=dimension,
-                 lsf = lsf,
-                 failure = y0,
-                 learn_db = learn_db,
-                 lsf_value = G$g,
-                 seeds = seeds,
-                 seeds_eval = seeds_meta,
-                 limit_fun_MH = meta_fun[[i-1]],
-                 z_lsf = z_lsf,
-                 plot = plot,
-                 add = TRUE,
-                 output_dir = output_dir,
-                 verbose = verbose,...)
-      meta_step = do.call(SMART,arg)
-    }
+    meta_step = do.call(SMART,arg)
     
     if(!is.null(output_dir)){
       if(verbose>0){cat("\n * 2D PLOT : CLOSE DEVICE \n")}

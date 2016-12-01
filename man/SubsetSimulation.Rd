@@ -7,7 +7,7 @@
 \title{Subset Simulation Monte Carlo}
 \usage{
 SubsetSimulation(dimension, lsf, p_0 = 0.1, N = 10000, q = 0,
-  lower.tail = TRUE, K, burnin = 20, save.all = FALSE, plot = FALSE,
+  lower.tail = TRUE, K, thinning = 20, save.all = FALSE, plot = FALSE,
   plot.level = 5, plot.lsf = TRUE, output_dir = NULL, plot.lab = c("x",
   "y"), verbose = 0)
 }
@@ -31,7 +31,7 @@ K(X) should propose a matrix of candidate sample (same dimension as X) on which
 \code{lsf} will be then evaluated and transition accepted of rejected. Default
 kernel is the one defined K(X) = (X + sigma*W)/sqrt(1 + sigma^2) with W ~ N(0, 1).}
 
-\item{burnin}{a burnin parameter for the the regeneration step.}
+\item{thinning}{a thinning parameter for the the regeneration step.}
 
 \item{save.all}{if TRUE, all the samples generated during the algorithms are saved
 and return at the end. Otherwise only the working population is kept at each
@@ -128,7 +128,7 @@ colMeans(t(comp[3:4,])) # check similar number of calls
 
 }
 \author{
-Clement WALTER \email{clement.walter@cea.fr}
+Clement WALTER \email{clementwalter@icloud.com}
 }
 \references{
 \itemize{
