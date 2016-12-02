@@ -6,7 +6,8 @@
 \usage{
 MonteCarlo(dimension, lsf, N_max = 5e+05,
   N_batch = foreach::getDoParWorkers(), q = 0, lower.tail = TRUE,
-  precision = 0.05, plot = FALSE, output_dir = NULL, verbose = 0)
+  precision = 0.05, plot = FALSE, output_dir = NULL, save.X = TRUE,
+  verbose = 0)
 }
 \arguments{
 \item{dimension}{the dimension of the input space.}
@@ -17,10 +18,10 @@ MonteCarlo(dimension, lsf, N_max = 5e+05,
 
 \item{N_batch}{number of points evaluated at each iteration.}
 
-\item{q}{the quantile}
+\item{q}{the quantile.}
 
 \item{lower.tail}{as for pxxxx functions, TRUE for estimating P(lsf(X) < q), FALSE
-for P(lsf(X) > q)}
+for P(lsf(X) > q).}
 
 \item{precision}{a targeted maximum value for the coefficient of variation.}
 
@@ -28,7 +29,10 @@ for P(lsf(X) > q)}
 
 \item{output_dir}{to save a copy of the plot in a pdf. This name will be
 pasted with
-"_Monte_Carlo_brut.pdf"}
+"_Monte_Carlo_brut.pdf".}
+
+\item{save.X}{to save all the samples generated as a matrix. Can be set to FALSE
+to reduce output size.}
 
 \item{verbose}{to control the level of outputs in the console; either 0 or 1 or 2 for
 almost no outputs to a high level output.}

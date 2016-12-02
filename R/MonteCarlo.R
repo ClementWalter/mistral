@@ -89,10 +89,10 @@ MonteCarlo = function(dimension,
                       N_batch 	= foreach::getDoParWorkers(),
                       #' @param N_batch number of points evaluated at each iteration.
                       q	= 0,
-                      #' @param q the quantile
+                      #' @param q the quantile.
                       lower.tail = TRUE,
                       #' @param lower.tail as for pxxxx functions, TRUE for estimating P(lsf(X) < q), FALSE
-                      #' for P(lsf(X) > q)
+                      #' for P(lsf(X) > q).
                       precision	= 0.05,
                       #' @param precision a targeted maximum value for the coefficient of variation.
                       plot 	= FALSE,
@@ -100,7 +100,10 @@ MonteCarlo = function(dimension,
                       output_dir = NULL,
                       #' @param output_dir to save a copy of the plot in a pdf. This name will be
                       #' pasted with
-                      #' "_Monte_Carlo_brut.pdf"
+                      #' "_Monte_Carlo_brut.pdf".
+                      save.X = TRUE,
+                      #' @param save.X to save all the samples generated as a matrix. Can be set to FALSE
+                      #' to reduce output size.
                       verbose 	= 0){
   #' @param verbose to control the level of outputs in the console; either 0 or 1 or 2 for
   #' almost no outputs to a high level output.
@@ -115,7 +118,7 @@ MonteCarlo = function(dimension,
   
   
   # Fix NOTE issue with R CMD check
-  x <- y <- z <- ..level.. <- NULL
+  x <- y <- z <- ..level.. <- X <- NULL
   
   if(lower.tail==FALSE){
     lsf_dec = lsf
@@ -131,7 +134,8 @@ MonteCarlo = function(dimension,
   if(verbose>0){cat(" * STEP 1 : FIRST SAMPLING AND ESTIMATION \n")}
   Nrem = min(N_max - Ncall, N_batch)
   if(verbose>1){cat("   - Generate N_batch = ",Nrem," standard samples\n")}
-  U = matrix(rnorm(dimension*N_batch),dimension,Nrem, dimnames = list(rep(c('x', 'y'), ceiling(dimension/2))[1:dimension]))
+  U <- matrix(rnorm(dimension*N_batch),dimension,Nrem, dimnames = list(rep(c('x', 'y'), ceiling(dimension/2))[1:dimension]))
+  if(save.X) X <- U
   
   if(verbose>1){cat("   - Evaluate LSF on these samples\n")}
   G = lsf(U); Ncall = Ncall + N_batch
@@ -166,6 +170,7 @@ MonteCarlo = function(dimension,
     if(verbose>0){cat(" * cov =",cov,">",precision,"and",N_max - Ncall,"remaining calls to the LSF \n")}
     if(verbose>1){cat("   - Generate N =",Nrem,"standard samples\n")}
     U = matrix(rnorm(dimension*Nrem),dimension,Nrem, dimnames = list(rep(c('x', 'y'), ceiling(dimension/2))[1:dimension]))
+    if(save.X) X <- cbind(X, U)
     
     if(verbose>1){cat("   - Evaluate LSF on these samples\n")}
     G = c(G,lsf(U)); Ncall = Ncall + Nrem
@@ -228,7 +233,7 @@ MonteCarlo = function(dimension,
              Ncall=Ncall,
              #' \item{Ncall}{the total numnber of calls to the \code{lsf}, ie the total
              #' number of generated samples.}
-             X = U,
+             X = X,
              #' \item{X}{the generated samples.}
              Y = G*(-1)^(!lower.tail)
              #' \item{Y}{the value \code{lsf(X)}.}
