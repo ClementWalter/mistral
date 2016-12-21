@@ -2,19 +2,18 @@ Package: mistral
 Type: Package
 Title: Methods in Structural Reliability
 Version: 2.2.1
-Date: 2015-11-30
-Author: Nicolas BOUSQUET, Gilles DEFAUX, Bertrand IOOSS, Vincent MOUTOUSSAMY,
-    Clement WALTER
+Date: 2016-12-21
+Author: Clement WALTER, Gilles DEFAUX, Bertrand IOOSS, Vincent MOUTOUSSAMY with contributions from Nicolas BOUSQUET, Claire CANNAMELA and Paul LEMAITRE
 Maintainer: Bertrand Iooss <biooss@yahoo.fr>
 Depends: R (>= 3.0.0)
 Imports: e1071, Matrix, mvtnorm, ggplot2, doParallel, foreach,
         iterators, DiceKriging, emoa, quadprog, Rcpp
 Suggests: microbenchmark, deSolve, scatterplot3d, KrigInv, rgenoud,
         kernlab, knitr, rmarkdown
-Description: Various reliability analysis methods for: 1) computing
-    failure probability (probability that the output of a numerical
-    model exceeds a threshold); 2) computing the size of a sample
-    to estimate a quantile with a confidence level.
+Description: Various reliability analysis methods for rare event inference:
+1) computing failure probability (probability that the output of a numerical model exceeds a threshold),
+2) computing quantiles of low or high-order,
+3) Wilks formula to compute quantile(s) from a sample or the size of the required i.i.d. sample.
 LinkingTo: Rcpp
 License: CeCILL
 NeedsCompilation: no
