@@ -2,7 +2,7 @@
 \alias{mistral-package}
 \alias{mistral}
 \docType{package}
-\title{Methods in structural reliability}
+\title{Methods In Structural Reliability Analysis}
 
 \description{
 Provide tools for structural reliability analysis (failure probability, quantile).
@@ -12,8 +12,8 @@ Provide tools for structural reliability analysis (failure probability, quantile
  \tabular{lll}{
    Package: \tab mistral\cr
    Type: \tab Package\cr
-   Version: \tab 2.0.0
-   Date: \tab 2015-12-18\cr
+   Version: \tab 2.2.1
+   Date: \tab 2016-12-21\cr
    License: \tab CeCILL
   }
 This package provides tools for structural reliability analysis:
@@ -24,12 +24,13 @@ This package provides tools for structural reliability analysis:
     \item Calculate failure probability with Monotonic Reliability Methods (MRM)
     \item Calculate failure probability with metamodel based algorithms : AKMCS, SMART and MetaIS
     \item Calculate failure probability with a metamodel based Subset Simulation : S2MART
-    \item Compute Wilks formula (minimal size of a sample to estimate quantile with a confidence level).
+    \item Wilks formula: Compute a quantile (or tolerance interval) with a given confidence level from a i.i.d. sample,
+    \item Wilks formula: Compute the minimal sample size to estimate a quantile with a given confidence level,
     \item Calculate a quantile under monotonicity constraints
 }
 }
 
-\author{Gilles Defaux, Bertrand Iooss, Vincent Moutoussamy, Clement Walter with contributions from Nicolas Bousquet and Paul Lemaitre 
+\author{Clement Walter, Gilles Defaux, Bertrand Iooss, Vincent Moutoussamy, with contributions from Nicolas Bousquet, Claire Cannamela and Paul Lemaitre
 (maintainer: Bertrand Iooss \email{biooss@yahoo.fr})}
 
 \references{
@@ -53,19 +54,34 @@ B. Echard, N. Gayton, M. Lemaire. AK-MCS : an Active learning reliability method
 
 M. Lemaire, A. Chateauneuf and J. Mitteau. Structural reliability, Wiley Online Library, 2009.
 
+V. Moutoussamy. Contributions to structural reliability analysis: accounting for monotonicity constraints in numerical models, PhD Thesis of Universite de Toulouse, France, 2015.
+
 W.T. Nutt and G.B. Wallis. Evaluation of nuclear safety from the outputs of computer codes in the presence of uncertainties. Reliability Engineering and System Safety, 83:57-77, 2004.
 
 P.-H. Waarts. Structural reliability using finite element methods: an appraisal of DARS, Directional Adaptive Response Surface Sampling. PhD. Thesis, Technical University of Delft, The Netherlands, 2000.
 
+C. Walter. Using Poisson processes for rare event simulation, PhD Thesis of Universite Paris Diderot, France, 2016.
+ 
 S.S. Wilks. Determination of Sample Sizes for Setting Tolerance Limits. Annals Mathematical Statistics, 12:91-96, 1941.
 
 }
 
 \examples{
+########## FORM ########### 
+distribution = list()
+distribution[[1]] = list("gamma",c(2,1))
+distribution[[2]] = list("gamma",c(3,1))
+f <- function(X){
+  X[1]/sum(X) - qbeta((1e-5),2,3)
+}
+
+res <- FORM(f, u.dep = c(0,0.1), inputDist = distribution,
+  N.calls = 1000, eps = 1e-7, Method = "HLRF", IS = "TRUE",
+  q = 0.1, copula = "unif")
+
 ########### Wilks ##########
 
 N <- WilksFormula(0.95,0.95,order=1)
 print(N)
-
 }
 \keyword{ package }
