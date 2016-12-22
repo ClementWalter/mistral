@@ -20,7 +20,7 @@ computeQuickKrigcov <- function(model,
   # cov.F est la covariance d'erreur due a l'estimation de la tendance
   cov.F <- precalc.data$first.member%*%second.member
 
-  # c.newdata est la cov entre learn.db et les points à prédire
+  # c.newdata est la cov entre learn.db et les points a predire
   # crossprod(precalc.data$Kinv.c.olddata,c.newdata) = t(c.newdata) %*% K^(-1) %*% c.newdata
   # cov.std = c.xnew.integpoints - t(c.newdata) %*% K^(-1) %*% c.newdata
   kn <- c.xnew.integpoints - crossprod(precalc.data$Kinv.c.olddata,c.newdata) + cov.F
