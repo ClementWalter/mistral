@@ -75,7 +75,7 @@ f <- function(X){
   X[1]/sum(X) - qbeta((1e-5),2,3)
 }
 
-res <- FORM(f, u.dep = c(0,0.1), inputDist = distribution,
+res <- FORMv0(f, u.dep = c(0,0.1), inputDist = distribution,
   N.calls = 1000, eps = 1e-7, Method = "HLRF", IS = "TRUE",
   q = 0.1, copula = "unif")
 
