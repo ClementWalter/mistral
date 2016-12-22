@@ -10,10 +10,7 @@ Imports: e1071, Matrix, mvtnorm, ggplot2, doParallel, foreach,
         iterators, DiceKriging, emoa, quadprog, Rcpp
 Suggests: microbenchmark, deSolve, scatterplot3d, KrigInv, rgenoud,
         kernlab, knitr, rmarkdown
-Description: Various reliability analysis methods for rare event inference:
-1) computing failure probability (probability that the output of a numerical model exceeds a threshold),
-2) computing quantiles of low or high-order,
-3) Wilks formula to compute quantile(s) from a sample or the size of the required i.i.d. sample.
+Description: Various reliability analysis methods for rare event inference: 1) computing failure probability (probability that the output of a numerical model exceeds a threshold), 2) computing quantiles of low or high-order, 3) Wilks formula to compute quantile(s) from a sample or the size of the required i.i.d. sample.
 LinkingTo: Rcpp
 License: CeCILL
 NeedsCompilation: no
