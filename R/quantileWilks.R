@@ -1,3 +1,5 @@
+#' @importFrom stats pbeta qbinom uniroot
+#' @export
 quantileWilks = function(alpha=0.95, beta=0.95, data=NULL, bilateral=FALSE){
   
 # Input:     2 required arguments (by default: unilateral quantile)
