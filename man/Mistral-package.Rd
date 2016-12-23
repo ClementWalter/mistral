@@ -68,16 +68,18 @@ S.S. Wilks. Determination of Sample Sizes for Setting Tolerance Limits. Annals M
 
 \examples{
 ########## FORM ########### 
-distribution = list()
-distribution[[1]] = list("gamma",c(2,1))
-distribution[[2]] = list("gamma",c(3,1))
-f <- function(X){
-  X[1]/sum(X) - qbeta((1e-5),2,3)
-}
+# u.dep is a starting point for the research of the Most Probable Failing Point
+# N.calls is a total number of calls
+form <- mistral::FORM(dimension = 2, mistral::kiureghian, N.calls = 1000,
+                    u.dep = c(0,0))
+form$p
 
-res <- FORMv0(f, u.dep = c(0,0.1), inputDist = distribution,
-  N.calls = 1000, eps = 1e-7, Method = "HLRF", IS = "TRUE",
-  q = 0.1, copula = "unif")
+# use IS=TRUE to use an Importance Sampling scheme with a Gaussian standard
+# proposal distribution centred at the MPFP
+form.IS <- mistral::FORM(dimension = 2, mistral::kiureghian, N.calls = 1000,
+                       u.dep = c(0,0),
+                       IS = TRUE)
+form.IS$p
 
 ########### Wilks ##########
 

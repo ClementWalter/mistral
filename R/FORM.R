@@ -23,14 +23,14 @@
 #' 
 #' @examples 
 #' \dontrun{
-#' u.dep is a starting point for the research of the Most Probable Failing Point
-#' N.calls is a total number of calls
+#' # u.dep is a starting point for the research of the Most Probable Failing Point
+#' # N.calls is a total number of calls
 #' form <- mistral::FORM(dimension = 2, mistral::kiureghian, N.calls = 1000,
 #'                      u.dep = c(0,0))
 #' form$p
 #' 
-#' use IS=TRUE to use an Importance Sampling scheme with a Gaussian standard
-#' proposal distribution centred at the MPFP
+#' # use IS=TRUE to use an Importance Sampling scheme with a Gaussian standard
+#' # proposal distribution centred at the MPFP
 #' form.IS <- mistral::FORM(dimension = 2, mistral::kiureghian, N.calls = 1000,
 #'                         u.dep = c(0,0),
 #'                         IS = TRUE)
