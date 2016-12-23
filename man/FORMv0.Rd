@@ -1,6 +1,6 @@
 \name{FORMv0}
 \alias{FORMv0}
-\title{FORM method}
+\title{FORM method (old version)}
 
 \description{
   Calculate failure probability by FORM method and important sampling.
@@ -79,7 +79,7 @@ M. Lemaire, A. Chateauneuf and J. Mitteau. Structural reliability, Wiley Online 
     X[1]/sum(X) - qbeta((1e-5),2,3)
  }
 
- res <- FORMv0(f, u.dep = c(0,0.1), inputDist = distribution, 
+ res <- mistral:::FORMv0(f, u.dep = c(0,0.1), inputDist = distribution, 
      N.calls = 1000, eps = 1e-7, Method = "HLRF", IS = "TRUE", 
      q = 0.1, copula = "unif")
                   
