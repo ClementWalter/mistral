@@ -80,7 +80,6 @@ form.IS <- mistral::FORM(dimension = 2, mistral::kiureghian, N.calls = 1000,
                        u.dep = c(0,0),
                        IS = TRUE)
 form.IS$p
-=======
 
 ########### Wilks ##########
 

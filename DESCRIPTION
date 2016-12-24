@@ -18,4 +18,4 @@ Repository: CRAN
 LazyData: true
 RoxygenNote: 5.0.1
 Packaged: 2016-11-22 21:47:54 UTC; clementwalter
-VignetteBuilder: knitr
+VignetteBuilder: knitr, rmarkdown
