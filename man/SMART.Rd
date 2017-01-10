@@ -23,8 +23,8 @@ SMART(dimension,
       k1 	          	= round(6*(dimension/2)^(0.2)),
       k2 	          	= round(12*(dimension/2)^(0.2)),
       k3 	          	= k2 + 16,
-      learn_db  	    = NULL,
-      lsf_value 	    = NULL,
+      X  	    = NULL,
+      y 	    = NULL,
       failure   	    = 0,
       limit_fun_MH 	  = NULL,
       sampling_strategy = "MH",
@@ -58,8 +58,8 @@ SMART(dimension,
   \item{k1}{Rank of the first iteration of step S (ie stage L from 1 to \code{k1}-1).}
   \item{k2}{Rank of the first iteration of step C (ie stage S from \code{k1} to \code{k2}-1).}
   \item{k3}{Rank of the last iteration of step C (ie stage C from \code{k2} to \code{k3}).}
-  \item{learn_db}{optional. A matrix of already known points, with dim : \code{dimension} x number_of_vector.}
-  \item{lsf_value}{values of the limit state function on the vectors given in \code{learn_db}.}
+  \item{X}{optional. A matrix of already known points, with dim : \code{dimension} x number_of_vector.}
+  \item{y}{values of the limit state function on the vectors given in \code{X}.}
   \item{failure}{the value defining the failure domain F = \{ x | \code{limit_state_function}(x) < \code{failure} \}.}
   \item{limit_fun_MH}{optional. If the working space is to be reduced to some subset defining by a function, eg. in case of use in a Subset Simulation algorithm. As for the \code{limit_state_function}, failure domain is defined by points whom values of \code{limit_fun_MH} are negative.}
   \item{sampling_strategy}{either "AR" or "MH", to specify which sampling strategy is to be used when generating Monte-Carlo population in a case of subset simulation : "AR" stands for \sQuote{accept-reject} while "MH" stands for Metropolis-Hastings.}
@@ -83,8 +83,8 @@ SMART(dimension,
   \item{cov}{The coefficient of variation of the Monte-Carlo probability estimate.}
   \item{gamma}{The gamma value corresponding to the correlation between Monte-Carlo samples got from Metropolis-Hastings algorithm.}
   \item{Ncall}{The total number of calls to the \code{limit_state_function}.}
-  \item{learn_db}{The final learning database, ie. all points where \code{limit_state_function} has been calculated.}
-  \item{lsf_value}{The value of the \code{limit_state_function} on the learning database.}
+  \item{X}{The final learning database, ie. all points where \code{limit_state_function} has been calculated.}
+  \item{y}{The value of the \code{limit_state_function} on the learning database.}
   \item{meta_fun}{The metamodel approximation of the \code{limit_state_function}. A call output is a list containing the value and the standard deviation.}
   \item{meta_model}{The final metamodel.}
   \item{points}{Points in the failure domain according to the metamodel.}
