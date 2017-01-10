@@ -6,10 +6,10 @@
 Simulation}
 \usage{
 AKMCS(dimension, lsf, N = 5e+05, N1 = 10 * dimension, Nmax = 200,
-  Nmin = 2, learn_db = NULL, lsf_value = NULL, failure = 0,
-  precision = 0.05, bayesian = TRUE, compute.PPP = FALSE,
-  meta_model = NULL, kernel = "matern5_2", learn_each_train = TRUE,
-  crit_min = 2, lower.tail = TRUE, limit_fun_MH = NULL, failure_MH = 0,
+  Nmin = 2, X = NULL, y = NULL, failure = 0, precision = 0.05,
+  bayesian = TRUE, compute.PPP = FALSE, meta_model = NULL,
+  kernel = "matern5_2", learn_each_train = TRUE, crit_min = 2,
+  lower.tail = TRUE, limit_fun_MH = NULL, failure_MH = 0,
   sampling_strategy = "MH", first_DOE = "Gaussian", seeds = NULL,
   seeds_eval = limit_fun_MH(seeds), burnin = 30, plot = FALSE,
   limited_plot = FALSE, add = FALSE, output_dir = NULL, verbose = 0)
@@ -27,9 +27,9 @@ AKMCS(dimension, lsf, N = 5e+05, N1 = 10 * dimension, Nmax = 200,
 
 \item{Nmin}{minimum number of calls during enrichment step.}
 
-\item{learn_db}{coordinates of already known points.}
+\item{X}{coordinates of already known points.}
 
-\item{lsf_value}{value of the LSF on these points.}
+\item{y}{value of the LSF on these points.}
 
 \item{failure}{failure threshold.}
 
@@ -60,7 +60,8 @@ for P(lsf(X) > failure)}
 \item{sampling_strategy}{either MH for Metropolis-Hastings of AR for accept-reject.}
 
 \item{first_DOE}{either Gaussian or Uniform, to specify the population on which
-clustering is done.}
+clustering is done. Set to "No" for no initial DoE (use together with a first DoE
+given in \code{X} for instance).}
 
 \item{seeds}{if some points are already known to be in the appropriate subdomain.}
 
@@ -85,9 +86,9 @@ more outputs as described below:
 \item{p}{the estimated failure probability.}
 \item{cov}{the coefficient of variation of the Monte-Carlo probability estimate.}
 \item{Ncall}{the total number of calls to the \code{lsf}.}
-\item{learn_db}{the final learning database, ie. all points where \code{lsf} has
+\item{X}{the final learning database, ie. all points where \code{lsf} has
 been calculated.}
-\item{lsf_value}{the value of the \code{lsf} on the learning database.}
+\item{y}{the value of the \code{lsf} on the learning database.}
 \item{h}{the sequence of the estimated relative SUR criteria.}
 \item{I}{the sequence of the estimated integrated SUR criteria.}
 \item{meta_fun}{the metamodel approximation of the \code{lsf}. A call output is a
@@ -177,7 +178,7 @@ cov = sqrt((1-P)/(N*P))
 
 }
 \author{
-Clement WALTER \email{clement.walter@cea.fr}
+Clement WALTER \email{clementwalter@icloud.com}
 }
 \references{
 \itemize{

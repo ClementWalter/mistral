@@ -3,7 +3,7 @@
 #' @description This function runs the Moving Particles algorithm for estimating extreme probability
 #' and quantile.
 #'
-#' @author Clement WALTER \email{clement.walter@cea.fr}
+#' @author Clement WALTER \email{clementwalter@icloud.com}
 #'
 #' @aliases LPA
 #'
@@ -181,7 +181,7 @@ MP = function(dimension,
       } else {
         mp <- do.call(IRW, arg)
       }
-      mp[c('L', 'Ncall', 'particles', 'LSF_particles')]
+      mp[c('L', 'Ncall', 'X', 'y')]
     }
     
     t.mp.1 <- t(mp.1)
@@ -199,8 +199,8 @@ MP = function(dimension,
     cat(" * N.batch =", N.batch, "\n\n")
     mp.2 <- foreach(i=iter(mp.1)) %dopar% {
       arg = c(list(
-        particles = i$particles,
-        LSF_particles = i$LSF_particles,
+        X = i$X,
+        y = i$y,
         q = L_max,
         last.return = FALSE),
         arg)
@@ -214,12 +214,12 @@ MP = function(dimension,
         warning = function(cond){}
       )
       mp$L <- mp$L[-1] # First time equals last one from first pass
-      mp[c('L', 'Ncall', 'particles', 'LSF_particles')]
+      mp[c('L', 'Ncall', 'X', 'y')]
     }
     t.mp.2 <- t(mp.2)
     moves <- sapply(t.mp.2$L, length) + Niter_1fold(N)
-    particles = do.call(cbind, t.mp.2$particles)
-    LSF_particles = unlist(t.mp.2$LSF_particles)
+    X = do.call(cbind, t.mp.2$X)
+    y = unlist(t.mp.2$y)
     Ncall <- Ncall + unlist(t.mp.2$Ncall)
     L = sort(c(L, unlist(t.mp.2$L)))
     # cat("\n ### END OF PARALLEL PART \n\n")
@@ -239,15 +239,15 @@ MP = function(dimension,
       #cat(" * TRAIN N0",k,"in",N.batch,"\n")
       if(verbose<2){capture.output(mp <- do.call(IRW, arg))}
       else{mp <- do.call(IRW, arg)}
-      mp[c('Ncall', 'L', 'particles', 'LSF_particles')]
+      mp[c('Ncall', 'L', 'X', 'y')]
     }
     t.mp <- t(mp)
-    Ncall <- L <- particles <- LSF_particles <- NULL
+    Ncall <- L <- X <- y <- NULL
     lapply(mp, function(l) {
       Ncall <<- c(Ncall, l$Ncall)
       L <<- c(L, l$L)
-      particles <<- cbind(particles, l$particles)
-      LSF_particles <<- c(LSF_particles, l$LSF_particles)
+      X <<- cbind(X, l$X)
+      y <<- c(y, l$y)
     })
     moves <- sapply(t.mp$L, length)
     # cat(" ### END OF PARALLEL PART \n\n")
@@ -257,7 +257,7 @@ MP = function(dimension,
   cat("                        End of MP algorithm \n")
   cat("========================================================================\n\n")
   
-  Ntot = length(LSF_particles)
+  Ntot = length(y)
   if(estim.proba){
     p = (1 - 1/Ntot)^sum(L<(q*(-1)^lower.tail))
     p_int = c( p*exp(-1.96*sqrt(-log(p)/Ntot)) , p*exp(+1.96*sqrt(-log(p)/Ntot)) )
@@ -338,8 +338,8 @@ MP = function(dimension,
              #' \item{p}{the estimated probability or the reference for the quantile estimate.}
              q = q,
              #' \item{q}{the estimated quantile or the reference for the probability estimate.}
-             cov = ifelse(estim.proba, sqrt(sum(moves))/Ntot, 0),
-             #' \item{cov}{the coefficient of variation of the probability estimator.}
+             cv = ifelse(estim.proba, sqrt(sum(moves))/Ntot, 0),
+             #' \item{cv}{the coefficient of variation of the probability estimator.}
              ecdf = ecdf_MP,
              #' \item{ecdf}{the empirical cdf.}
              L_max = L_max,
@@ -349,10 +349,10 @@ MP = function(dimension,
              #' \item{times}{the \emph{times} of the random process.}
              Ncall = Ncall,
              #' \item{Ncall}{the total number of calls to the \code{lsf}.}
-             particles = particles,
-             #' \item{particles}{the \code{N} particles in their final state.}
-             LSF_particles = LSF_particles,
-             #' \item{LSF_particles}{the value of the \code{lsf(particles)}.}
+             X = X,
+             #' \item{X}{the \code{N} particles in their final state.}
+             y = y,
+             #' \item{y}{the value of the \code{lsf(X)}.}
              moves = moves)
   #' \item{moves}{a vector containing the number of moves for each batch.}
   

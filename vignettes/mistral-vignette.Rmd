@@ -13,7 +13,7 @@ header-includes:
   - \usepackage{animate}
 ---
 
-```{r, cache=FALSE, include=FALSE}
+```{r init, cache=FALSE, include=FALSE}
 library(knitr)
 knitr::opts_chunk$set(fig.path='figure/',
                cache.path='cache/',
@@ -50,27 +50,27 @@ Let us detail the use of `UtoX` (and similarly of `XtoU`). The supported distrib
 * Beta: defined by its internal parameters `P1=shape1` and `P2=shape2` (see `*beta` help page)
  
 Let us define for instance a random vector $\mathbf{X}$ in 2d such that its coordinates are standard Gaussian:
-```{r}
+```{r input-margin}
 distX1 <- list(type='Norm',  MEAN=0.0, STD=1.0, P1=NULL, P2=NULL, NAME='X1')
 distX2 <- list(type='Norm',  MEAN=0.0, STD=1.0, P1=NULL, P2=NULL, NAME='X2')
 input.margin <- list(distX1,distX2)
 ```
 and correlated $cor(X_1, X_2) = 0.5$:
-```{r}
+```{r modifCorrMatrix}
 input.Rho    <- matrix( c(1.0, 0.5,
                           0.5, 1.0),nrow=2)
 input.R0     <- mistral::ModifCorrMatrix(input.Rho)
 L0           <- t(chol(input.R0))
 ```
 then the function `UtoX` writes:
-```{r}
+```{r UtoX}
 U <- rnorm(2)
 U <- cbind(U, U)
 X <- mistral::UtoX(U, input.margin, L0)
 X
 ```
 The function `UtoX` works with vectors or matrices and always returns a matrix. Eventually the limit-state function can be defined by:
-```{r}
+```{r lsf-UtoX}
 lsf_U = function(U) {   
     X <- mistral::UtoX(U, input.margin, L0)
     lsf(X)
@@ -81,45 +81,45 @@ lsf_U = function(U) {
 All the methods implemented in `mistral` and presented in this vignette require that `lsf` be a function taking a matrix as input and returning a vector as ouput. Indeed, in order to allow for parallel computing, batches of points to be evaluated are given as a matrix of column vectors. Hence, depending on the processing capaiblities and/or the implementation, computation of the model $g$ on the points $\mathbf{X}$ can be made a lot faster.
 
 Let us define an easy 2-dimensional function:
-```{r}
+```{r lsf-vect}
 lsf <- function(x){
   x[1] + x[2]
 }
 ```
 This function can be called onto a vector:
-```{r}
+```{r lsf-vect-example}
 x <- c(1,2)
 lsf(x)
 ```
 or a matrix:
-```{r}
+```{r lsf-vect-example-matrix}
 x <- as.matrix(x)
 lsf(x)
 ```
 However, one wants it to be able to address matrices with several columns representing different points:
-```{r}
+```{r lsf-vect-fail-matrix}
 x <- cbind(x,x)
 lsf(x)
 ```
 This obviously does not provide the expected result. There are indeed several possibilities to make the example fit into our framework. In this simple case, one has an analytical expression of the function. This can arise when using the package for educational/illustrative purpose. An easy way to fix that is then to redefine the function with `x` as a matrix:
-```{r}
+```{r lsf-matrix}
 lsf <- function(x) {
   x[1,] + x[2,]
 }
 lsf(x)
 ```
 Note here that the function considers each **column** as a single point. This is to be consistent with the default behaviour of `as.matrix` function:
-```{r}
+```{r lsf-matrix-x}
 x <- 1:2
 as.matrix(x)
 ```
 Now looking back at our function, one has:
-```{r, error=TRUE}
+```{r lsf-matrix-error, error=TRUE}
 x <- cbind(x,x)
 lsf(x[,1])
 ```
 The function returns an error because default R behaviour is to drop the dimensions when selecting only one column. All together, a robust way to define a function is to apply first `as.matrix`:
-```{r}
+```{r lsf-asmatrix}
 lsf <- function(x) {
   x <- as.matrix(x)
   x[1,] + x[2,]
@@ -128,7 +128,7 @@ lsf(x[,1])
 ```
 
 In general (practical) settings, no analytical expression is available. Let us denote by `myCode` the given computer code. `myCode` is supposed to be able to be called onto a vector. Then the `apply` function can be used:
-```{r}
+```{r lsf-apply}
 lsf <- function(x){
   x <- as.matrix(x)
   apply(x, 2, myCode)
@@ -136,7 +136,7 @@ lsf <- function(x){
 ```
 
 When parallel computing is availble, it is then possible to make a parallel calculation of a batch of points given as a matrix. Let us give an example using the [`foreach`](https://cran.r-project.org/package=foreach) and [`iterators`](https://cran.r-project.org/web/packages/iterators/index.html) packages (we recommand the user to read their very nice [vignettes](https://cran.r-project.org/web/packages/foreach/vignettes/foreach.pdf) to get started with the `foreach` loop, which is useful not only for parallel computing but also as a nice alternative to the `*apply` family).
-```{r}
+```{r lsf-foreach}
 require(foreach)
 lsf <- function(x){
   x <- as.matrix(x)
@@ -146,17 +146,26 @@ lsf <- function(x){
 }
 ```
 
+## Giving known points in input
+
+Some methods implemented in `mistral` allow for giving in inputs already evaluated samples (from previous calculation for instance). The formalism is always the following:
+
+ * the input samples are given with the variable `X`
+ * the value of the `lsf` on these samples is given in `y`
+ 
+`X` should be a matrix with `nrow = dimension` and `ncol = number of samples` so that `length(y) = ncol(X)`. Note that if `y` is missing, it will be calculated by the algorithm.
+
 ## Short tutorial for using parallel computation with `foreach`
 
 In the previous section we have shown how to use the `foreach` loop to define a well-suited function for using parallel computation. Indeed, `foreach` requires the initilisation of a parallel backend to run _effectively_ in parallel. For instance, using the above code without further initilisation will issue a `Warning`:
-```{r, warning=TRUE}
+```{r foreach-nobackend, warning=TRUE}
 myCode <- function(x) x[1] + x[2]
 x <- 1:2
 lsf(x)
 ```
 
 Basically, a parallel backend can be understood as a way of defining what _parallel_ means for the (master) R session. The simplest, and not of great interest, backend is the _sequential_ one:
-```{r}
+```{r foreach-registerDoSeq}
 foreach::registerDoSEQ()
 ```
 This tells R that _parallel_ means indeed usual sequential computation. However the interest of parallel computation is to run _simultaneously_ several tasks.
@@ -166,7 +175,7 @@ With R, the management of these _parallel_ tasks is let to the task manager of t
 There are two main possible frameworks for parallel computing: OpenMP and MPI. Without digging to much into the details, OpenMP lets you use the several cores of one given _computer_ (one shared memory) while MPI allows for using several computers connected with a bus.
 
 Let us first focus on OpenMP. Depending on the OS of the workstation (Windows or Mac/Linux), you can use either [`doSNOW`](https://cran.r-project.org/web/packages/doSNOW/index.html)  or [`doMC`](https://cran.r-project.org/web/packages/doMC/doMC.pdf). SNOW (Simple Network of Workstations) is available for both Windows and Unix OS. It requires to first create a cluster with base package `parallel::makeCluster()`. This means that the subsequent R sessions (slave sessions in parallel terminology) are created once for all in the beginning. It is like opening several R sessions by hand: looking at your task manager you will see as many R processes as the size of the requested cluster.
-```{r}
+```{r foreach-registerDoSNOW}
 # return the number of cores of the computer
 n <- parallel::detectCores()
 # default behaviour if n not specified explained in the help page
@@ -178,11 +187,11 @@ foreach::getDoParName()
 foreach::getDoParWorkers()
 ```
 In the end, the cluster has to be closed with:
-```{r}
+```{r foreach-stopCluster}
 parallel::stopCluster(cl)
 ```
 The other option for Unix OS is `doMC`. The main difference is that the cluster is made by _forking_ the current master session, ie. that the sub-sessions are a copy of the current session, including all the variables defined in the `.GlobalEnv`. It is easier to initialise and more robust (SNOW can miss variable even though `foreach` tries an automatic export of the necessary ones):
-```{r}
+```{r foreach-doMC}
 doMC::registerDoMC(1)
 # Control that everything is set properly
 foreach::getDoParName()
@@ -214,7 +223,7 @@ The statistical methods aim at solving the first issue, ie. at estiamting the pr
 
 ### Crude Monte Carlo method
 The crude Monte Caro method is based on the Strong Law of Large Numbers. Basically it makes an average of independent and identically distributed (iid) samples. A basic way to implement it could be:
-```{r}
+```{r basic-MC}
 X <- matrix(rnorm(2e5), nrow = 2) # generate 1e5 standard Gaussian samples
 Y <- mistral::kiureghian(X) # evaluate to model to get 1e5 iid samples
 q <- 0 # define the threshold
@@ -222,13 +231,13 @@ q <- 0 # define the threshold
 ```
 
 The function `mistral::MonteCarlo` is a wrap-up of this simple algorithm. However, instead of specifying a given number of samples, it works iteratively by adding `N_batch` samples per iteration until a target precision `precision` on the probability estimation is reached (usually a coefficient of variation of 5 or 10\%) or `N_max` samples have been simulated.
-```{r}
+```{r mistral-MC}
 mc <- mistral::MonteCarlo(dimension = 2, lsf = mistral::kiureghian, N_max = 1e5, q = q,
                           # these first parameters are exactly the one used above
                            N_batch = 1e4) # define the batch size
 ```
 In this latter example, the target precision is not reached but the algorithm stopped because of the limit given by `N_max`. It is possible to set `N_max = Inf`:
-```{r}
+```{r mistral-MC-nolimit}
 mc <- mistral::MonteCarlo(dimension = 2, lsf = mistral::kiureghian, N_max = Inf, q = q,
                            N_batch = 1e4, # define the batch size
                            verbose = 1) # control the level of log messages
@@ -241,14 +250,14 @@ As for the base _cdf_ functions `p****` (`pnorm, plnorm, punif...`) the statisti
 * `lower.tail = FALSE` means instead $P[g(X) > q]$
 
 For illustrative purpose it is also possible to plot the contour of the limit-state function. All `mistral` functions let draw samples and contour with `ggplot2` functions even though this can be quite memory and time demanding:
-```{r}
+```{r mistral-MC-plot}
 mc <- mistral::MonteCarlo(dimension = 2, lsf = mistral::kiureghian, N_max = 1e4, q = q,
                            N_batch = 1e4, # define the batch size
                            plot = TRUE)
 ```
 
 The `MonteCarlo` method also returns the empirical cdf of the real-valued random variable $Y = g(\mathbf{X})$ (similarly to the base `stats::ecdf` function):
-```{r}
+```{r MC-ecdf-plot}
 require(ggplot2)
 y = seq(-5, 10, l = 200)
 ggplot(data.frame(y=y, ecdf = mc$ecdf(y)), aes(y,ecdf)) + geom_line()
@@ -257,7 +266,7 @@ ggplot(data.frame(y=y, ecdf = mc$ecdf(y)), aes(y,ecdf)) + geom_line()
 ### Subset Simulation method
 
 As visible in the Monte Carlo method plot, this method is quite inefficient because it samples a lot in the safety domain (the red dots). To circumvent this limitation, the splitting method, also called _Subset Simulation_ and implemented as `mistral::SubsetSimulation` works iteratively on the threshold $q$. Instead of trying to estimate directly $P[g(X) < q]$ it creates a sequence of intermediate thresholds $(q_i)$ such that the **conditional probabilities are not too small**. Hence, instead of simulating new iid `N_batch` it resamples the `N_batch` using Markov Chain drawing conditionally to be greater than a threshold defined as the `p_0` empirical quantile of the previous batch.
-```{r, fig.keep='all', fig.show='animate'}
+```{r SubsetSimulation, fig.keep='all', fig.show='animate'}
 ss <- mistral::SubsetSimulation(dimension = 2, lsf = mistral::kiureghian, q = 0,
                                 N = 1e4,
                                 plot = TRUE)
@@ -280,27 +289,27 @@ In other words, each element is generated conditionally greater than the previou
 
 Since the algorithm generates iid realisations of such a random walk, it is especially suited for using with parallel computing. Hence the code includes a `foreach` loop and will directely benefit from a parallel backend.
 
-```{r}
+```{r MP}
 mp <- mistral::MP(dimension = 2,  lsf = mistral::kiureghian, q = 0, N = 1e2)
 ```
 One can compare this result with the one got from `SubsetSimulation` in terms of coefficient of variation against total number of calls.
-```{r}
-ss$cov^2*ss$Ncall / (mp$cov^2*sum(mp$Ncall))
+```{r SS-MP-benchmark}
+ss$cv^2*ss$Ncall / (mp$cv^2*sum(mp$Ncall))
 ```
 
 The `MP` method not only returns an estimation of the sought probability $p$ but also an empirical _cdf_ of $Y = g(\mathbf{X})$ over the interval $[q, \infty)$ (with `lower.tail = TRUE`, the complementary _cdf_ over $(-\infty, q]$ otherwise).
-```{r}
+```{r MP-ecdf}
 y = seq(0, 10, l = 200)
 ggplot(data.frame(y=y, ecdf = mp$ecdf(y)), aes(y,ecdf)) + geom_line()
 ```
 
 The empirical _cdf_ is vectorized over `q` and returns a `NA` when the value is not in the right interval.
 It can also be used to estimate a quantile:
-```{r}
+```{r MP-quantile}
 mp <- mistral::MP(dimension = 2,  lsf = mistral::kiureghian, p = mp$p, N = 1e2)
 ```
 This latter estimation also enables parallel computation but in a 2-step algorithm. The empirical _cdf_ is estimated until the farthest _state_ reached by the iid random walks. Note also that the condifence interval requires to run the algorithm a little bit longer and thus is optional: default parameter `compute_confidence = FALSE`.
-```{r}
+```{r MP-quantile-confidence}
 mp <- mistral::MP(dimension = 2,  lsf = mistral::kiureghian, p = mp$p, N = 1e2,
                   compute_confidence = TRUE)
 ```
@@ -323,7 +332,7 @@ In `mistral` there are basically three types of metamodel implemented:
 A Support-Vector Machine is a surrogate model which aims at **classifying** the samples of the input space according to some labels attached on it. In our context the label is straightforward: failing or safety domain. From a bunch of input-outputs couples, it builds a frontier and lets classify any new sample $\mathbf{X}$.
 
 When talking about SVM, one often makes mention of the _kernel trick_. Indeed the SVM was initially build as a linear classifier, ie that it looked for an hyperplane separating the input space into two subspaces, each one being related to a given label. However this was far too constraining. The use of a kernel instead of the natural inner product lets build more complex non-linear classifiers.
-```{r}
+```{r SVM-tuto}
 require(e1071)
 X <- data.frame(x1 = rnorm(100), x2 = rnorm(100))
 Y <- rowSums(X^2)
@@ -341,7 +350,7 @@ Kriging refers to the case where the computer code $g$ is seen as a specific rea
 In computer experiement, this random process is always supposed to be Gaussian. Furthermore, the parameters of the random process covariance are usually estimated with a plug-in approach: in a first step the model is fitted with some data (with Maximum Likelihood Estimation of Cross-Validation for instance). Then they are supposed to be known and thus the distribution of the process at any point $\mathbf{x}$ is Gaussian with known mean and variance.
 
 These quantities are referred to as the kriging mean and the kriging variance. While the first one usually serves as a cheap surrogate model for $g$, the second one lets characterise the _precision_ of the prediction. Especially Kriging interpolates the data: the kriging variance at known location is 0.
-```{r}
+```{r kriging-tuto}
 require(DiceKriging)
 X <- data.frame(x1 = rnorm(100), x2 = rnorm(100))
 Y <- rowSums(X^2)
@@ -363,13 +372,13 @@ lsf.FORM = function(x) {
 ```
 
 The `FORM` function requires two parameters: a starting point for the research of the Most Probable Failing Point `u.dep` and a total number of calls `N.calls`:
-```{r}
+```{r FORM}
 form <- mistral::FORM(dimension = 2, mistral::kiureghian, N.calls = 1000, u.dep = c(0,0))
 form$p
 ```
 
 The FORM method gives an analytical expression of the sought probability replacing the true model $g$ with the found hyperplane. However, `mistral::FORM` also implements an Importance Sampling scheme. Instead of using this ready-made formula, it makes an IS estimation with a Gaussian standard proposal distribution centred at the MPFP.
-```{r}
+```{r FORM-IS}
 form.IS <- mistral::FORM(dimension = 2, mistral::kiureghian, N.calls = 1000,
                          u.dep = c(0,0),
                          IS = TRUE)
@@ -395,7 +404,7 @@ The algorithm is then twofold: first the Gaussian process is _learnt_, with mean
 
 The enrichment step stops either when the stopping criterion is reached or when the total given nummber of samples is simulated. Then few other calls to $g$ have to made for the Importance Sampling estimator.
 
-```{r, fig.keep="all", fig.show="animate"}
+```{r MetaIS, fig.keep="all", fig.show="animate"}
 metais <- mistral::MetaIS(dimension = 2, lsf = mistral::waarts, N = 3e5, K_alphaLOO = 5,
                           plot = TRUE)
 ```
@@ -408,7 +417,7 @@ The originality and the efficiency of the `AKMCS` method comes from the fact tha
 
 Note however that this discretisation makes the algorithm generating quite huge matrices and can lead to memory issues for extreme probabilities $p \leq 10^{ <- 5}$.
 
-```{r, fig.keep="all", fig.show="animate"}
+```{r AKMCS, fig.keep="all", fig.show="animate"}
 akmcs <- mistral::AKMCS(dimension = 2, lsf = mistral::waarts, N = 3e5, plot = TRUE, Nmax = 10)
 ```
 
@@ -420,7 +429,7 @@ The core concept is to used a _small_ population in the `Subset Simulation` algo
 
 This sequential approache allows this method to be used for extreme event, unlike `AKMCS` for instance. In the end, a lot of practical parameters can be set but default values are the ones set up by the author and should be modified very carefully as their meaning and impact is rather unclear.
 
-```{r, fig.keep="all", fig.show="animate"}
+```{r S2MART, fig.keep="all", fig.show="animate"}
 smart <- mistral::S2MART(dimension = 2, lsf = mistral::waarts, failure = -2,
                         k1 = 3, k2 = 5, k3 = 6,
                         plot = TRUE)
@@ -437,13 +446,13 @@ The `BMP` method is a Bayesian version of the previous `MP` algorithm. Indeed, i
  
 For instance one can use the database created by the `AKMCS` method stored in the output `akmcs`:
 
-```{r}
+```{r BMP}
 bmp <- mistral::BMP(dimension = 2, lsf = mistral::waarts, q = 0, N = 100,
-                    N.iter = 0, learn_db = akmcs$learn_db, y = akmcs$lsf_value)
+                    N.iter = 0, X = akmcs$X, y = akmcs$y)
 ```
 
 The method can also be used, as the other one, to _learn_ the metamodel:
-```{r, fig.keep='all', fig.show="animate"}
+```{r BMP-learn, fig.keep='all', fig.show="animate"}
 bmp <- mistral::BMP(dimension = 2, lsf = mistral::waarts, q = -4, N = 100,
                     N.iter = 2, plot = TRUE)
 ```

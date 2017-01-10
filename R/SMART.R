@@ -24,8 +24,8 @@ SMART = function(dimension,
                  k2 = round(12*(dimension/2)^(0.2)), # Rank of the first iteration of step C
                  k3 = k2 + 16,                  # Rank of the last iteration of step C
                  #Arguments for SMART used in Subset simulation
-                 learn_db  = NULL,              # Coordinates of alredy known points
-                 lsf_value = NULL,              # Value of the LSF on these points
+                 X  = NULL,              # Coordinates of alredy known points
+                 y = NULL,              # Value of the LSF on these points
                  failure   = 0,                 # Failure threshold
                  limit_fun_MH = NULL,           # Define an area of exclusion with a limit function, eg in metaSS
                  sampling_strategy = "MH",      # Either MH for Metropolis-Hastings of AR for accept-reject
@@ -47,7 +47,7 @@ SMART = function(dimension,
   cat("===================================\n")
   
   # Fix NOTE for R CMD check
-  x <- y <- z <- ..level.. <- NULL
+  x <- z <- ..level.. <- NULL
   
   ## STEP 0 : INITIALISATION
   
@@ -71,7 +71,7 @@ SMART = function(dimension,
            Nclose=NA)
   
   #G stands for the value of the limit state function on these points
-  G = list(g=NA,#value on learn_db points, ie all the value already calculated at a given iteration
+  G = list(g=NA,#value on X points, ie all the value already calculated at a given iteration
            Nmargin=NA,
            Nswitch=NA,
            Nclose=NA,
@@ -157,20 +157,20 @@ SMART = function(dimension,
   
   #add points to the learning database
   if(verbose>0){cat(" * Add points to the learning database\n")}
-  if(is.null(learn_db)){
-    learn_db = cbind(seq(0,0,l=dimension),U$Nu)
+  if(is.null(X)){
+    X = cbind(seq(0,0,l=dimension),U$Nu)
     g0 = lsf(as.matrix(seq(0,0,l=dimension)));Ncall = Ncall + 1;#this is to insure consistency between model sign and lsf sign
     G$g = c(g0,G$Nu)
   }
   else{
-    learn_db = cbind(learn_db,U$Nu)
-    G$g = c(lsf_value,G$Nu)
+    X = cbind(X,U$Nu)
+    G$g = c(y,G$Nu)
   }
   
   #Train the model
   if(verbose>0){cat(" * Train the model\n")}
-  if(verbose<1){capture.output(meta <- trainModel(design=learn_db,response=(G$g-failure),type="SVM",cost=tune_cost,gamma=tune_gamma))}
-  else{meta = trainModel(design=learn_db,response=(G$g-failure),type="SVM",cost=tune_cost,gamma=tune_gamma)}
+  if(verbose<1){capture.output(meta <- trainModel(design=X,response=(G$g-failure),type="SVM",cost=tune_cost,gamma=tune_gamma))}
+  else{meta = trainModel(design=X,response=(G$g-failure),type="SVM",cost=tune_cost,gamma=tune_gamma)}
   
   #Update meta_fun & meta_model
   if(verbose>0){cat(" * UPDATE quantities based on surrogate model \n")}
@@ -282,7 +282,7 @@ SMART = function(dimension,
         G$Nmargin <- lsf(U$Nmargin);Ncall = Ncall + Nmargin
         #Add points U$Nmargin to the learning database
         if(verbose>0){cat(" * Add points to the learning database\n")}
-        learn_db <- cbind(learn_db,U$Nmargin)
+        X <- cbind(X,U$Nmargin)
         G$g = c(G$g,G$Nmargin)
         
         #plotting part
@@ -294,7 +294,7 @@ SMART = function(dimension,
         
         #Train the model
         if(verbose>0){cat(" * Train the model\n")}
-        meta = trainModel(meta_model,design=learn_db,response=(G$g-failure),updesign=U$Nmargin,upresponse=(G$Nmargin-failure),type="SVM")
+        meta = trainModel(meta_model,design=X,response=(G$g-failure),updesign=U$Nmargin,upresponse=(G$Nmargin-failure),type="SVM")
         #Update meta_fun & meta_model
         meta_model.prev = meta_model
         meta_model = meta$model
@@ -323,7 +323,7 @@ SMART = function(dimension,
         G$Nswitch = lsf(U$Nswitch);Ncall = Ncall + Nswitch
         #Add points U$Nmargin + U$Nswitch to the learning database
         if(verbose>0){cat(" * Add points U$Nswitch  to the learning database\n")}
-        learn_db = cbind(learn_db,U$Nswitch)
+        X = cbind(X,U$Nswitch)
         G$g = c(G$g,G$Nswitch)
         
         if(plot==TRUE){
@@ -334,7 +334,7 @@ SMART = function(dimension,
         
         #Train the model
         if(verbose>0){cat(" * Train the model\n")}
-        meta = trainModel(meta_model,design=learn_db,response=(G$g-failure),updesign=U$Nswitch,upresponse=(G$Nswitch-failure),type="SVM")
+        meta = trainModel(meta_model,design=X,response=(G$g-failure),updesign=U$Nswitch,upresponse=(G$Nswitch-failure),type="SVM")
         #Update meta_fun & meta_model
         meta_model.prev = meta_model
         meta_model = meta$model
@@ -355,7 +355,7 @@ SMART = function(dimension,
       G$Nclose = lsf(U$Nclose);Ncall = Ncall + Nclose
       #Add points U$Nclose to the learning database
       if(verbose>0){cat(" * Add points U$Nclose to the learning database\n")}
-      learn_db = cbind(learn_db,U$Nclose)
+      X = cbind(X,U$Nclose)
       G$g = c(G$g,G$Nclose)
       
       if(plot==TRUE){
@@ -366,7 +366,7 @@ SMART = function(dimension,
       
       #Train the model
       if(verbose>0){cat(" * Train the model\n")}
-      meta = trainModel(meta_model,design=learn_db,response=(G$g-failure),updesign=U$Nclose,upresponse=(G$Nclose-failure),type="SVM")
+      meta = trainModel(meta_model,design=X,response=(G$g-failure),updesign=U$Nclose,upresponse=(G$Nclose-failure),type="SVM")
       #Update meta_fun & meta_model
       meta_model.prev = meta_model
       meta_model = meta$model
@@ -439,8 +439,8 @@ SMART = function(dimension,
              cov = MC_delta,
              # gamma=MC_gamma,
              Ncall = Ncall,
-             learn_db = learn_db,
-             lsf_value = G$g,
+             X = X,
+             y = G$g,
              meta_fun = meta_fun,
              meta_model = meta_model,
              points = points,

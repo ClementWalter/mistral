@@ -271,8 +271,8 @@ SubsetSimulation = function(dimension,
   #' some more outputs as described below:
   result = list(p = P,
                 #' \item{p}{the estimated failure probability.}
-                cov = cov,
-                #' \item{cov}{the estimated coefficient of variation of the estimate.}
+                cv = cov,
+                #' \item{cv}{the estimated coefficient of variation of the estimate.}
                 Ncall = Ncall,
                 #' \item{Ncall}{the total number of calls to the \code{lsf}.}
                 X = U,

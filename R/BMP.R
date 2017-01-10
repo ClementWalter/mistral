@@ -3,7 +3,7 @@
 #' @description This function runs the Bayesian Moving Particles algorithm for estimating extreme probability
 #' and quantile.
 #'
-#' @author Clement WALTER \email{clement.walter@cea.fr}
+#' @author Clement WALTER \email{clementwalter@icloud.com}
 #'
 #' @aliases BMP
 #'
@@ -76,16 +76,16 @@ BMP <- function(dimension,
                 N.DoE = 5*dimension,
                 #' @param N.DoE the number of points for the initial Design of Experiment
                 firstDoE = "uniform",
-                #' @param firstDoE default is "maximin" for a maximim LHS. Also "uniform" for a random
-                #' uniform sampling over a sphere of radius \code{radius}.
+                #' @param firstDoE default is "uniform" for a random
+                #' uniform sampling over a sphere of radius \code{radius}. Also available "maximim" for a maximim LHS.
                 radius = qnorm(1e-10, lower.tail = FALSE),
                 #' @param radius the size of the radius of the sphere for uniform DoE or the semi length
                 #' of the interval on each dimension for maximin LHS
-                learn_db,
-                #' @param learn_db (optional) a first Design of Experiemnt to be used instead of building
+                X,
+                #' @param X (optional) a first Design of Experiemnt to be used instead of building
                 #' a new DoE
                 y,
-                #' @param y the value of \code{lsf} on the \code{learn_db}
+                #' @param y the value of \code{lsf} on the \code{X}
                 covariance = NULL,
                 #' @param covariance (optional) to give a covariance kernel for the \code{km} object.
                 learn_each_train = Inf,
@@ -109,14 +109,14 @@ BMP <- function(dimension,
                 #' @param lower.tail as for pxxxx functions, TRUE for estimating P(lsf(X) < q), FALSE
                 #' for P(lsf(X) > q).
                 save.dir,
-                #' @param save.dir (optional) a directory to save the \code{learn_db} and \code{y} at each iteration.
+                #' @param save.dir (optional) a directory to save the \code{X} and \code{y} at each iteration.
                 plot = FALSE,
                 #' @param plot to plot the DoE and the updated model.
                 plot.lsf = TRUE,
                 #' @param plot.lsf to plot the contour of the true \code{lsf}. Note that this requires its
                 #' evaluation on a grid and should be used only on toy examples.
-                plot.lab = c("x", "y"),
-                #' @param plot.lab the x and y label for the plot.
+                plot.lab = c("x_1", "x_2"),
+                #' @param plot.lab the labels of the axis for the plot.
                 chi2 = FALSE,
                 #' @param chi2 for a chi2 test on the number of events.
                 verbose = 1,
@@ -150,9 +150,9 @@ BMP <- function(dimension,
   cat(" * parallel backend registered:", foreach::getDoParRegistered(),"\n")
   cat(" * parallel backend version:", foreach::getDoParName(), "\n")
   cat("   - number of workers:", foreach::getDoParWorkers(), "\n")
-  if(!missing(learn_db)) {
+  if(!missing(X)) {
     cat(" ============================================================== \n")
-    cat(" BEGINNING : FIRST DoE given in inputs:", dim(learn_db)[2],"samples \n")
+    cat(" BEGINNING : FIRST DoE given in inputs:", dim(X)[2],"samples \n")
     cat(" ============================================================== \n\n")
   } else {
     cat(" ============================================================== \n")
@@ -160,21 +160,21 @@ BMP <- function(dimension,
     cat(" ============================================================== \n\n")
   }
   # First DoE. Change that afterward. For now random uniform sampling
-  if(missing(learn_db)){
-    learn_db <- switch(firstDoE,
+  if(missing(X)){
+    X <- switch(firstDoE,
                        "uniform" = t(runifSphere(dimension, N.DoE , radius)),
                        getLHS(n = N.DoE, dimension, radius = radius))
   }
   if(missing(y)){
-    y <- lsf(learn_db)
+    y <- lsf(X)
   }
-  dimnames(learn_db) <- list(rep(c('x', 'y'), length.out = dimension))
-  if(!missing(save.dir)) save(list = c('learn_db', 'y'), file = save.dir)
+  dimnames(X) <- list(rep(c('x', 'y'), length.out = dimension))
+  if(!missing(save.dir)) save(list = c('X', 'y'), file = save.dir)
 
   # First model
   coef.trend = km.param$coef.trend
   km.param$coef.trend <- NULL
-  arg.km = c(list(design = t(learn_db),
+  arg.km = c(list(design = t(X),
                   response = as.matrix(y)),
              km.param)
   if(!is.null(covariance)){
@@ -206,7 +206,7 @@ BMP <- function(dimension,
     p <- ggplot2::ggplot(data = df_plot, aes(x,y)) +
       ggplot2::theme(legend.position = "none") +
       ggplot2::xlim(-8, 8) + ggplot2::ylim(-8, 8) + xlab(plot.lab[1]) + ylab(plot.lab[2]) +
-      ggplot2::geom_point(data = data.frame(t(learn_db), z = y), aes(color=z))
+      ggplot2::geom_point(data = data.frame(t(X), z = y), aes(color=z))
     if(plot.lsf==TRUE){p <- p + ggplot2::geom_contour(aes(z=z, color=..level..), breaks = q)}
     print(p)
     z_meta = xi(t(df_plot[,1:2]))
@@ -483,11 +483,11 @@ BMP <- function(dimension,
              #' criterion as well as the computational spent.}
              q = q,
              #' \item{q}{the reference quantile for the probability estimate.}
-             ecdf_MP = ecdf_MP,
-             #' \item{ecdf_MP}{the empirical cdf, i.e. the estimation of the function q -> E(alpha(q)).}
+             ecdf = ecdf_MP,
+             #' \item{ecdf}{the empirical cdf, i.e. the estimation of the function q -> E(alpha(q)).}
              L_max = L_max,
              #' \item{L_max}{the farthest state reached by the random process. Validity range
-             #' for the \code{ecdf_MP} is then (-Inf, L_max] or [L_max, Inf).}
+             #' for the \code{ecdf} is then (-Inf, L_max] or [L_max, Inf).}
              PPP = PPP,
              #' \item{PPP}{the last Poisson process generated with \code{N.final} particles.}
              meta_fun = function(x) {
@@ -504,7 +504,7 @@ BMP <- function(dimension,
              #' \code{lower.tail==TRUE}; in this scope prefer using directly \code{meta_fun} which
              #' handles this possible issue.}
              model.first = model.first,
-             #' \item{krig.first}{the first metamodel with the intial DoE.}
+             #' \item{model.first}{the first metamodel with the intial DoE.}
              alpha_int = alpha_int)
   #' \item{alpha_int}{a 95\% confidence intervalle on the estimate of alpha.}
   if(chi2 == TRUE) {res = c(res, list(

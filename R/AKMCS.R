@@ -3,7 +3,7 @@
 #'
 #' @description Estimate a failure probability with the AKMCS method.
 #'
-#' @author Clement WALTER \email{clement.walter@cea.fr}
+#' @author Clement WALTER \email{clementwalter@icloud.com}
 #'
 #' @details AKMCS strategy is based on a original Monte-Carlo population which
 #' is classified
@@ -121,10 +121,10 @@ AKMCS = function(dimension,
                  #' @param Nmax maximum number of calls to the LSF.
                  Nmin = 2,
                  #' @param Nmin minimum number of calls during enrichment step.
-                 learn_db  = NULL,
-                 #' @param learn_db coordinates of already known points.
-                 lsf_value = NULL,
-                 #' @param lsf_value value of the LSF on these points.
+                 X  = NULL,
+                 #' @param X coordinates of already known points.
+                 y = NULL,
+                 #' @param y value of the LSF on these points.
                  failure   = 0,
                  #' @param failure failure threshold.
                  precision = 0.05,
@@ -155,7 +155,8 @@ AKMCS = function(dimension,
                  #' @param sampling_strategy either MH for Metropolis-Hastings of AR for accept-reject.
                  first_DOE = "Gaussian",
                  #' @param first_DOE either Gaussian or Uniform, to specify the population on which
-                 #' clustering is done.
+                 #' clustering is done. Set to "No" for no initial DoE (use together with a first DoE
+                 #' given in \code{X} for instance).
                  seeds = NULL,
                  #' @param seeds if some points are already known to be in the appropriate subdomain.
                  seeds_eval = limit_fun_MH(seeds),
@@ -180,7 +181,7 @@ AKMCS = function(dimension,
   cat("========================================================================\n\n")
   
   # Fix NOTE issue with R CMD check
-  x <- y <- z <- ..level.. <- crit <- NULL
+  x <- z <- ..level.. <- crit <- NULL
   
   ## STEP 0 : INITIALISATION
   
@@ -200,6 +201,12 @@ AKMCS = function(dimension,
     plot <- FALSE
   }
   
+  if(!missing(X) & missing(y)){
+    cat(' * X given in input without y, evaluate lsf on these samples\n')
+    y <- lsf(X)
+    Ncall <- Ncall + ncol(as.matrix(X))
+  }
+  
   # plotting part
   if(plot==TRUE){
     
@@ -214,9 +221,9 @@ AKMCS = function(dimension,
       ggplot2::theme(legend.position = "none") +
       ggplot2::xlim(-8, 8) + ggplot2::ylim(-8, 8)
     
-    if(!is.null(learn_db)){
-      row.names(learn_db) <- c('x', 'y')
-      p <- p + ggplot2::geom_point(data = data.frame(t(learn_db), z = lsf_value), ggplot2::aes(color=z))
+    if(!is.null(X)){
+      row.names(X) <- c('x', 'y')
+      p <- p + ggplot2::geom_point(data = data.frame(t(X), z = y), ggplot2::aes(color=z))
     }
     if(!is.null(limit_fun_MH)) {
       df_plot_MH = data.frame(expand.grid(x=xplot, y=yplot), z = limit_fun_MH(t(expand.grid(x=xplot, y=yplot))))
@@ -295,19 +302,19 @@ AKMCS = function(dimension,
     if(first_DOE!="No"){
       if(verbose>0){cat(" * Add points to the learning database\n")}
       lsf_DoE <- lsf(DoE);Ncall = Ncall + N1
-      if(is.null(learn_db)){
-        learn_db = array(DoE, dim = dim(DoE), dimnames = list(rep(c('x', 'y'), length.out = dimension)))
-        lsf_value = lsf_DoE
+      if(is.null(X)){
+        X = array(DoE, dim = dim(DoE), dimnames = list(rep(c('x', 'y'), length.out = dimension)))
+        y = lsf_DoE
       }
       else{
-        learn_db = cbind(learn_db,DoE)
-        lsf_value = c(lsf_value,lsf_DoE)
+        X = cbind(X,DoE)
+        y = c(y,lsf_DoE)
       }
     }
     
     if(plot==TRUE){
       if(verbose>0){cat(" * 2D PLOT : First DoE \n")}
-      p <- p + geom_point(data = data.frame(t(learn_db), z = lsf_value), aes(color=z))
+      p <- p + geom_point(data = data.frame(t(X), z = y), aes(color=z))
       print(p)
     }
   }
@@ -315,8 +322,8 @@ AKMCS = function(dimension,
   if(verbose>0){cat(" * Train the model :\n")}
   if(is.null(meta_model) || learn_each_train==TRUE || Nfailure>0) {
     if(verbose>1){cat("   - Learn hyperparameters\n")}
-    meta = trainModel(design   = learn_db,
-                      response = lsf_value,
+    meta = trainModel(design   = X,
+                      response = y,
                       kernel   = kernel,
                       type="Kriging")
     Nfailure = 0
@@ -334,7 +341,7 @@ AKMCS = function(dimension,
   
   ### Ajout BMP
   if(compute.PPP){
-    capture.output({bmp <- BMP(dimension = dimension, lsf = lsf, q = failure, N = 100, N.iter = 0, learn_db = learn_db, y = lsf_value)})
+    capture.output({bmp <- BMP(dimension = dimension, lsf = lsf, q = failure, N = 100, N.iter = 0, X = X, y = y)})
     h <- c(h, bmp$h)
     I <- c(I, bmp$I)
     cat(" * Current alpha estimate =", bmp$alpha, "\n")
@@ -389,8 +396,8 @@ AKMCS = function(dimension,
     
     candidate = as.matrix(U[,which.min(criterion)])
     eval      = lsf(candidate);Ncall = Ncall + 1
-    learn_db  = cbind(learn_db,candidate)
-    lsf_value = c(lsf_value, eval)
+    X  = cbind(X,candidate)
+    y = c(y, eval)
     
     #plotting part
     if(plot==TRUE){
@@ -402,8 +409,8 @@ AKMCS = function(dimension,
     if(verbose>1){cat("   - Train the model\n")}
     if(learn_each_train==TRUE) {
       if(verbose>1){cat("   - Learn hyperparameters\n")}
-      meta = trainModel(design=learn_db,
-                        response=lsf_value,
+      meta = trainModel(design=X,
+                        response=y,
                         kernel=kernel,
                         type="Kriging")
       Nfailure = 0
@@ -420,7 +427,7 @@ AKMCS = function(dimension,
     
     ### Ajout BMP
     if(compute.PPP){
-      capture.output({bmp <- BMP(dimension = dimension, lsf = lsf, q = failure, N = 100, N.iter = 0, learn_db = learn_db, y = lsf_value)})
+      capture.output({bmp <- BMP(dimension = dimension, lsf = lsf, q = failure, N = 100, N.iter = 0, X = X, y = y)})
       h <- c(h, bmp$h)
       I <- c(I, bmp$I)
       cat(" * Current alpha estimate =", bmp$alpha, "\n")
@@ -480,13 +487,13 @@ AKMCS = function(dimension,
   cat(" * cov =",cov,"\n")
   
   if( cov > precision) {
-    Nfailure = sum(lsf_value<failure)
+    Nfailure = sum(y<failure)
     if(P>0){
       N = ceiling((1-P)/(precision^2*P))
       cat("   => cov too large ; this order of magnitude for the probability brings N =",N,"\n")
     }
     else {
-      cat("   => cov too large, only",Nfailure,"failings points in the learn_db\n")
+      cat("   => cov too large, only",Nfailure,"failings points in the DoE\n")
     }
   }
   else{
@@ -504,7 +511,7 @@ AKMCS = function(dimension,
     df_plot_meta <- data.frame(df_plot[,1:2], z = z_meta$mean, crit = abs(failure - z_meta$mean)/z_meta$sd)
     print(p + geom_contour(data = df_plot_meta, aes(z=z, color=..level.., alpha = 0.5), breaks = failure) +
             geom_contour(data = df_plot_meta, aes(z=crit, color=..level.., alpha = 0.5), linetype = 4, breaks = crit_min) +
-            geom_point(data = data.frame(t(learn_db), z = lsf_value), aes(color=z)))
+            geom_point(data = data.frame(t(X), z = y), aes(color=z)))
   }
   
   if( (plot || limited_plot) & (add==FALSE) & !is.null(output_dir) ) { dev.off() }
@@ -519,11 +526,11 @@ AKMCS = function(dimension,
              #' \item{cov}{the coefficient of variation of the Monte-Carlo probability estimate.}
              Ncall=Ncall,
              #' \item{Ncall}{the total number of calls to the \code{lsf}.}
-             learn_db=learn_db,
-             #' \item{learn_db}{the final learning database, ie. all points where \code{lsf} has
+             X=X,
+             #' \item{X}{the final learning database, ie. all points where \code{lsf} has
              #' been calculated.}
-             lsf_value=(-1)^(!lower.tail)*lsf_value,
-             #' \item{lsf_value}{the value of the \code{lsf} on the learning database.}
+             y=(-1)^(!lower.tail)*y,
+             #' \item{y}{the value of the \code{lsf} on the learning database.}
              h = h,
              #' \item{h}{the sequence of the estimated relative SUR criteria.}
              I = I,

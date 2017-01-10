@@ -3,7 +3,7 @@
 #' @description An implementation of Ordinary Kriging based upon a km-class object that should be
 #' faster than usual predict method.
 #' 
-#' @author Clement WALTER \email{clement.walter@cea.fr}
+#' @author Clement WALTER \email{clementwalter@icloud.com}
 #' 
 #' @details The Ordinary Kriging is a special case of kriging where the trend is supposed to be
 #' and unknown constant. Consequently some linear algebra operations can be reduced by knowning

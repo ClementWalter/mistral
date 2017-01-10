@@ -6,7 +6,7 @@
 \usage{
 FORM(dimension, lsf, u.dep = rep(0, dimension), N.calls = 100,
   eps = 1e-07, Method = "HLRF", IS = FALSE, IS.ratio = 0.5,
-  plot = FALSE, plot.lsf = FALSE, plot.lab = c("x", "y"))
+  plot = FALSE, plot.lsf = FALSE, plot.lab = c("x_1", "x_2"))
 }
 \arguments{
 \item{dimension}{the dimension of the input space.}
@@ -78,7 +78,7 @@ form.IS$p
 
 }
 \author{
-Vincent MOUTOUSSAMY and Clement WALTER
+Vincent MOUTOUSSAMY and Clement WALTER \email{clementwalter@icloud.com}
 }
 \references{
 \itemize{

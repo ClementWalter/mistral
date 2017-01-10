@@ -11,7 +11,7 @@
 #' Furthermore, it should be able to handle matrix input of column vectors. See the mistral vignette
 #' for more info about \code{lsf} definition
 #' 
-#' @author Vincent MOUTOUSSAMY and Clement WALTER
+#' @author Vincent MOUTOUSSAMY and Clement WALTER \email{clementwalter@icloud.com}
 #' 
 #' @references
 #' \itemize{
@@ -75,7 +75,7 @@ FORM <- function(dimension,
                  #' @param plot.lsf a boolean indicating if the \code{lsf} should be added to the
                  #' plot. This requires the evaluation of the \code{lsf} over a grid and
                  #' consequently should be used only for illustation purposes.
-                 plot.lab = c('x', 'y')
+                 plot.lab = c('x_1', 'x_2')
                  #' @param plot.lab the x and y labels for the plot.
 ){
   

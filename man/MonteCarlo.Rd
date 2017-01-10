@@ -116,7 +116,7 @@ lsf_par = function(x){
 
 }
 \author{
-Clement WALTER \email{clement.walter@cea.fr}
+Clement WALTER \email{clementwalter@icloud.com}
 }
 \references{
 \itemize{

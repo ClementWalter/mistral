@@ -5,7 +5,7 @@
 \description{
 The limit-state function is defined in the standard space and isoprobabilistic transformation is used internally.
 }
-\usage{twodof}
+\usage{cantilever}
 \format{The function can handle a vector or a matrix with column vectors.}
 \references{
 Gayton, N. and Bourinet, J.-M. and Lemaire, M.:\cr

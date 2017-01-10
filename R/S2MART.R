@@ -4,7 +4,7 @@
 #' threshold, making number of necessary samples lower and the probability estimation
 #' better according to subset simulation by itself.
 #' 
-#' @author Clement WALTER \email{clement.walter@cea.fr}
+#' @author Clement WALTER \email{clementwalter@icloud.com}
 #' 
 #' @details
 #' 
@@ -165,7 +165,7 @@ S2MART = function(dimension,
   #Define the list variables used in the core loop
   U = list(Nn=matrix(nrow=dimension,ncol=Nn))
   #G stands for the value of the limit state function on these points
-  G = list(g=NA,#value on learn_db points, ie all the value already calculated at a given iteration
+  G = list(g=NA,#value on X points, ie all the value already calculated at a given iteration
            Nn=NA*c(1:Nn))
   
   #beginning of the core loop
@@ -191,10 +191,10 @@ S2MART = function(dimension,
       print(p)
     }
     
-  # ===========================================================================
-  # Subset Simulation part \n")
-  # ===========================================================================
-  
+    # ===========================================================================
+    # Subset Simulation part \n")
+    # ===========================================================================
+    
     # Create Monte Carlo population
     if(i==1){
       if(verbose>0){cat(" * Generate Nn =",Nn," standard gaussian samples\n")}
@@ -220,18 +220,18 @@ S2MART = function(dimension,
     if(verbose>0){cat(" * Add points U$Nn to the learning database\n\n")}
     if(i==1) {
       # first sample always the origin to insure consistency in the SVM classifier
-      learn_db = cbind(seq(0,0,l=dimension),U$Nn)
+      X = cbind(seq(0,0,l=dimension),U$Nn)
       g0 = lsf(as.matrix(seq(0,0,l=dimension))); Ncall = Ncall + 1;
       G$g = c(g0,G$Nn)
     }
     else {
-      learn_db = cbind(learn_db,U$Nn)
+      X = cbind(X,U$Nn)
       G$g = c(G$g,G$Nn)
     }
-    rownames(learn_db) <- rep(c('x', 'y'), length.out = dimension)
+    rownames(X) <- rep(c('x', 'y'), length.out = dimension)
     
     if(plot==TRUE){
-      p <- p + geom_point(data = data.frame(t(learn_db), z = G$g), aes(color = z))
+      p <- p + geom_point(data = data.frame(t(X), z = G$g), aes(color = z))
       print(p)
     }
     
@@ -242,8 +242,8 @@ S2MART = function(dimension,
     arg = list(dimension=dimension,
                lsf=lsf,
                failure = y0,
-               learn_db = learn_db,
-               lsf_value = G$g,
+               X = X,
+               y = G$g,
                plot = plot,
                z_lsf = z_lsf,
                add = TRUE,
@@ -266,8 +266,8 @@ S2MART = function(dimension,
     P = P*meta_step$proba
     delta2 = tryCatch(delta2 + (meta_step$cov)^2,error = function(cond) {return(NA)})
     Ncall = Ncall + meta_step$Ncall
-    learn_db = meta_step$learn_db
-    G$g = meta_step$lsf_value
+    X = meta_step$X
+    G$g = meta_step$y
     meta_fun[[i]] = meta_step$meta_fun
     meta_model = meta_step$meta_model
     seeds = meta_step$points
@@ -291,13 +291,13 @@ S2MART = function(dimension,
              #' estimate.}
              Ncall=Ncall,
              #' \item{Ncall}{The total number of calls to the \code{lsf}.}
-             learn_db=learn_db,
+             X=X,
              
-             #' \item{learn_db}{The final learning database, ie. all points where \code{lsf}
+             #' \item{X}{The final learning database, ie. all points where \code{lsf}
              #' has been calculated.}
-             lsf_value=G$g,
+             y=G$g,
              
-             #' \item{lsf_value}{The value of the \code{lsf} on the learning database.}
+             #' \item{y}{The value of the \code{lsf} on the learning database.}
              meta_model=meta_model
              #' \item{meta_model}{The final metamodel. An object from \pkg{e1071}.}
   );

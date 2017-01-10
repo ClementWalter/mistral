@@ -49,14 +49,14 @@ a 95\% interval on the quantile estimator.}
 An object of class \code{list} containing the outputs described below:
 \item{p}{the estimated probability or the reference for the quantile estimate.}
 \item{q}{the estimated quantile or the reference for the probability estimate.}
-\item{cov}{the coefficient of variation of the probability estimator.}
+\item{cv}{the coefficient of variation of the probability estimator.}
 \item{ecdf}{the empirical cdf.}
 \item{L_max}{the farthest state reached by the random process. Validity range
 for the \code{ecdf} is then (-Inf, L_max] or [L_max, Inf).}
 \item{times}{the \emph{times} of the random process.}
 \item{Ncall}{the total number of calls to the \code{lsf}.}
-\item{particles}{the \code{N} particles in their final state.}
-\item{LSF_particles}{the value of the \code{lsf(particles)}.}
+\item{X}{the \code{N} particles in their final state.}
+\item{y}{the value of the \code{lsf(X)}.}
 \item{moves}{a vector containing the number of moves for each batch.}
 \item{p_int}{a 95\% confidence intervalle on the probability estimate.}
 \item{cov}{the coefficient of variation of the estimator}
@@ -122,7 +122,7 @@ p.est <- MP(2, kiureghian, N = 100, q = 0, N.batch = getDoParWorkers())
 
 }
 \author{
-Clement WALTER \email{clement.walter@cea.fr}
+Clement WALTER \email{clementwalter@icloud.com}
 }
 \references{
 \itemize{

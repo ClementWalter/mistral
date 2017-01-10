@@ -59,7 +59,7 @@ be paster with
 An object of class \code{list} containing the failure probability and
 some more outputs as described below:
 \item{p}{the estimated failure probability.}
-\item{cov}{the estimated coefficient of variation of the estimate.}
+\item{cv}{the estimated coefficient of variation of the estimate.}
 \item{Ncall}{the total number of calls to the \code{lsf}.}
 \item{X}{the working population.}
 \item{Y}{the value lsf(X).}

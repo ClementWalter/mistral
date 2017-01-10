@@ -6,12 +6,12 @@
 \usage{
 BMP(dimension, lsf, q, N = 1000, N.final = N, N.iter = 30,
   adaptive = FALSE, N.DoE = 5 * dimension, firstDoE = "uniform",
-  radius = qnorm(1e-10, lower.tail = FALSE), learn_db, y, covariance = NULL,
+  radius = qnorm(1e-10, lower.tail = FALSE), X, y, covariance = NULL,
   learn_each_train = Inf, km.param = list(nugget.estim = TRUE, multistart =
   1, optim.method = "BFGS", coef.trend = q), burnin = 20, fast = TRUE,
   sur = list(integrated = TRUE, r = 1, approx.pnorm = FALSE),
   lower.tail = TRUE, save.dir, plot = FALSE, plot.lsf = TRUE,
-  plot.lab = c("x", "y"), chi2 = FALSE, verbose = 1, breaks)
+  plot.lab = c("x_1", "x_2"), chi2 = FALSE, verbose = 1, breaks)
 }
 \arguments{
 \item{dimension}{the dimension of the input space.}
@@ -33,16 +33,16 @@ being over a given threshold.}
 
 \item{N.DoE}{the number of points for the initial Design of Experiment}
 
-\item{firstDoE}{default is "maximin" for a maximim LHS. Also "uniform" for a random
-uniform sampling over a sphere of radius \code{radius}.}
+\item{firstDoE}{default is "uniform" for a random
+uniform sampling over a sphere of radius \code{radius}. Also available "maximim" for a maximim LHS.}
 
 \item{radius}{the size of the radius of the sphere for uniform DoE or the semi length
 of the interval on each dimension for maximin LHS}
 
-\item{learn_db}{(optional) a first Design of Experiemnt to be used instead of building
+\item{X}{(optional) a first Design of Experiemnt to be used instead of building
 a new DoE}
 
-\item{y}{the value of \code{lsf} on the \code{learn_db}}
+\item{y}{the value of \code{lsf} on the \code{X}}
 
 \item{covariance}{(optional) to give a covariance kernel for the \code{km} object.}
 
@@ -66,14 +66,14 @@ particles and then makes some moves with the generated discretised distribution.
 \item{lower.tail}{as for pxxxx functions, TRUE for estimating P(lsf(X) < q), FALSE
 for P(lsf(X) > q).}
 
-\item{save.dir}{(optional) a directory to save the \code{learn_db} and \code{y} at each iteration.}
+\item{save.dir}{(optional) a directory to save the \code{X} and \code{y} at each iteration.}
 
 \item{plot}{to plot the DoE and the updated model.}
 
 \item{plot.lsf}{to plot the contour of the true \code{lsf}. Note that this requires its
 evaluation on a grid and should be used only on toy examples.}
 
-\item{plot.lab}{the x and y label for the plot.}
+\item{plot.lab}{the labels of the axis for the plot.}
 
 \item{chi2}{for a chi2 test on the number of events.}
 
@@ -95,9 +95,9 @@ divided by estimated alpha.}
 \item{sur_stat}{a list containing at each iterations number of points tried for the SUR
 criterion as well as the computational spent.}
 \item{q}{the reference quantile for the probability estimate.}
-\item{ecdf_MP}{the empirical cdf, i.e. the estimation of the function q -> E(alpha(q)).}
+\item{ecdf}{the empirical cdf, i.e. the estimation of the function q -> E(alpha(q)).}
 \item{L_max}{the farthest state reached by the random process. Validity range
-for the \code{ecdf_MP} is then (-Inf, L_max] or [L_max, Inf).}
+for the \code{ecdf} is then (-Inf, L_max] or [L_max, Inf).}
 \item{PPP}{the last Poisson process generated with \code{N.final} particles.}
 \item{meta_fun}{the metamodel approximation of the \code{lsf}. A call output is a
 list containing the value and the standard deviation.}
@@ -106,7 +106,7 @@ that the algorithm enforces the problem to be the estimation of P[lsf(X)>q]
 and so using \sQuote{predict} with this object will return inverse values if
 \code{lower.tail==TRUE}; in this scope prefer using directly \code{meta_fun} which
 handles this possible issue.}
-\item{krig.first}{the first metamodel with the intial DoE.}
+\item{model.first}{the first metamodel with the intial DoE.}
 \item{alpha_int}{a 95\% confidence intervalle on the estimate of alpha.}
 \item{moves}{a vector containing the number of moves for each one of the \code{N.batch} particles.}
 \item{chi2}{the output of the chisq.test function.}
@@ -136,7 +136,7 @@ functions.
 
 }
 \author{
-Clement WALTER \email{clement.walter@cea.fr}
+Clement WALTER \email{clementwalter@icloud.com}
 }
 \references{
 \itemize{

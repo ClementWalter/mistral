@@ -37,9 +37,9 @@ and some more outputs as described below:
 \item{cov}{The coefficient of variation of the Monte-Carlo probability
 estimate.}
 \item{Ncall}{The total number of calls to the \code{lsf}.}
-\item{learn_db}{The final learning database, ie. all points where \code{lsf}
+\item{X}{The final learning database, ie. all points where \code{lsf}
 has been calculated.}
-\item{lsf_value}{The value of the \code{lsf} on the learning database.}
+\item{y}{The value of the \code{lsf} on the learning database.}
 \item{meta_model}{The final metamodel. An object from \pkg{e1071}.}
 }
 \description{
@@ -109,7 +109,7 @@ computation; see examples in \link{MonteCarlo}.
 
 }
 \author{
-Clement WALTER \email{clement.walter@cea.fr}
+Clement WALTER \email{clementwalter@icloud.com}
 }
 \references{
 \itemize{

@@ -6,11 +6,10 @@
 \alias{TPA}
 \title{Increasing Randow Walk}
 \usage{
-IRW(dimension, lsf, N = 10, q = Inf, Nevent = Inf, particles,
-  LSF_particles = lsf(particles), K, burnin = 20, sigma = 0.3,
-  last.return = TRUE, use.potential = TRUE, plot = FALSE,
-  plot.lsf = FALSE, print_plot = FALSE, output_dir = NULL,
-  plot.lab = c("x", "y"))
+IRW(dimension, lsf, N = 10, q = Inf, Nevent = Inf, X, y = lsf(X), K,
+  burnin = 20, sigma = 0.3, last.return = TRUE, use.potential = TRUE,
+  plot = FALSE, plot.lsf = FALSE, print_plot = FALSE, output_dir = NULL,
+  plot.lab = c("x_1", "x_2"))
 }
 \arguments{
 \item{dimension}{dimension of the input space.}
@@ -23,9 +22,9 @@ IRW(dimension, lsf, N = 10, q = Inf, Nevent = Inf, particles,
 
 \item{Nevent}{the number of desired events.}
 
-\item{particles}{to start with some given particles.}
+\item{X}{to start with some given particles.}
 
-\item{LSF_particles}{value of the \code{lsf} on these particles.}
+\item{y}{value of the \code{lsf} on X.}
 
 \item{K}{kernel transition for conditional generations.}
 
@@ -60,8 +59,8 @@ An object of class \code{list} containing the following data:
 \item{L}{the events of the random walk.}
 \item{M}{the total number of iterations.}
 \item{Ncall}{the total number of calls to the \code{lsf}.}
-\item{particles}{a matrix containing the final particles.}
-\item{LSF_particles}{the value of \code{lsf} on the \code{particles}.}
+\item{X}{a matrix containing the final particles.}
+\item{y}{the value of \code{lsf} on \code{X}.}
 \item{q}{the threshold considered when generating the random walk.}
 \item{Nevent}{the target number of events when generating the random walk.}
 \item{Nwmoves}{the number of rejected transitions, ie when the proposed point was not stricly
@@ -112,7 +111,7 @@ fail.samp <- IRW(2, lsf, q = 0, N = 10, plot = TRUE)
 }
 }
 \author{
-Clement WALTER \email{clement.walter@cea.fr}
+Clement WALTER \email{clementwalter@icloud.com}
 }
 \references{
 \itemize{

@@ -5,7 +5,7 @@
 #' 
 #' @aliases NestedSampling TPA
 #' 
-#' @author Clement WALTER \email{clement.walter@cea.fr}
+#' @author Clement WALTER \email{clementwalter@icloud.com}
 #' 
 #' @details This function lets generate the increasing random walk associated with a continous
 #' real-valued random variable of the form \code{Y = lsf(X)} where \code{X} is
@@ -84,10 +84,10 @@ IRW = function(dimension,
                #' @param q level until which the randow walk is to be generated.
                 Nevent = Inf, 
                #' @param Nevent the number of desired events.
-                particles,          
-               #' @param particles to start with some given particles.
-                LSF_particles = lsf(particles),      
-               #' @param LSF_particles value of the \code{lsf} on these particles.
+                X,          
+               #' @param X to start with some given particles.
+                y = lsf(X),      
+               #' @param y value of the \code{lsf} on X.
                 K,                  
                #' @param K kernel transition for conditional generations.
                 burnin = 20,             
@@ -115,7 +115,7 @@ IRW = function(dimension,
                #' be pasted with \sQuote{_IRW.pdf}. Together with \code{print_plot==TRUE} this will
                #' produce a pdf with a plot at each iteration, enabling \sQuote{video} reconstitution
                #' of the algorithm.
-               plot.lab = c('x', 'y')
+               plot.lab = c('x_1', 'x_2')
                #' @param plot.lab the x and y labels for the plot
 ){
 
@@ -150,7 +150,7 @@ IRW = function(dimension,
   cat(" STEP 1 : FIRST SAMPLING AND MINIMUM \n")
   cat(" =================================== \n\n")
   
-  if(missing(particles)){ 
+  if(missing(X)){ 
     cat("## Draw an iid N =",N,"sample (X_i) \n")
     X = matrix(rnorm(dimension*N),ncol=N, dimnames = list(rep(c('x', 'y'), ceiling(dimension/2))[1:dimension]))
     
@@ -159,16 +159,16 @@ IRW = function(dimension,
   }
   else{
     cat("## Restart chain from the particules \n")
-    X = particles
+    # X = particles
     row.names(X) <- rep(c('x', 'y'), ceiling(dimension/2))[1:dimension]
     
     cat("## Get the LSF values \n")
-    if(missing(LSF_particles)) {
+    if(missing(y)) {
       y = lsf(X)
     }
-    else{
-      y = LSF_particles
-    }
+    # else{
+    #   y = LSF_particles
+    # }
     N = length(y)
   }
   
@@ -328,10 +328,10 @@ IRW = function(dimension,
 #' \item{M}{the total number of iterations.}
                Ncall = Ncall,
 #' \item{Ncall}{the total number of calls to the \code{lsf}.}
-               particles = X,
-#' \item{particles}{a matrix containing the final particles.}
-               LSF_particles = y,
-#' \item{LSF_particles}{the value of \code{lsf} on the \code{particles}.}
+               X = X,
+#' \item{X}{a matrix containing the final particles.}
+               y = y,
+#' \item{y}{the value of \code{lsf} on \code{X}.}
                q = q,
 #' \item{q}{the threshold considered when generating the random walk.}
                Nevent = Nevent,

@@ -2,7 +2,7 @@
 #' 
 #' @description Estimate a failure probability using a crude Monte Carlo method.
 #' 
-#' @author Clement WALTER \email{clement.walter@cea.fr}
+#' @author Clement WALTER \email{clementwalter@icloud.com}
 #' 
 #' @details This implementation of the crude Monte Carlo method works with evaluating
 #' batchs of points sequentialy until a given precision is reached on the final
