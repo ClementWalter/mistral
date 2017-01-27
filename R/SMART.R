@@ -6,40 +6,126 @@
 ##    CEA
 ## -----------------------------------------------------------------------------
 
+#' @title Support-vector Margin Algoritm for Reliability esTimation
+#' 
+#' @description Calculate a failure probability with SMART method. This
+#' should not be used by itself but only through S2MART.
+#'
+#' @author Clement WALTER \email{clementwalter@icloud.com}
+#' 
+#' @aliases SMART
+#'
+#' @details 
+#' \code{SMART} is a reliability method proposed by J.-M. Bourinet et al. It makes
+#' uses of a SVM-based metamodel to approximate the limit state function and calculates
+#' the failure probability with a crude Monte-Carlo method using the metamodel-based
+#' limit state function. As SVM is a classification method, it makes use of limit state
+#' function values to create two classes : greater and lower than the failure threshold.
+#' Then the border is taken as a surogate of the limit state function.
+#' 
+#' Concerning the refinement strategy, it distinguishes 3 stages, known as Localisation,
+#' Stalibilsation and Convergence stages. The first one is proposed to reduce the margin
+#' as much as possible, the second one focuses on switching points while the last one works
+#' on the final Monte-Carlo population and is designed to insure a strong margin;
+#' see F. Deheeger PhD thesis for more information.
+#' 
+#' @note
+#' Problem is supposed to be defined in the standard space. If not, use \code{\link{UtoX}}
+#' to do so.
+#' 
+#' Furthermore, each time a set of vector is defined as a matrix,
+#' \sQuote{nrow} = \code{dimension} and \sQuote{ncol} = number of vector.
+#' 
+#' @references
+#'   \itemize{
+#' \item
+#' J.-M. Bourinet, F. Deheeger, M. Lemaire:\cr
+#' \emph{Assessing small failure probabilities by combined Subset Simulation and Support Vector Machines}\cr
+#' Structural Safety (2011)
+#' 
+#' \item
+#' F. Deheeger:\cr
+#' \emph{Couplage mecano-fiabiliste : 2SMART - methodologie d'apprentissage stochastique en fiabilite}\cr
+#'   PhD. Thesis, Universite Blaise Pascal - Clermont II, 2008
+#' }
+#' 
+#' @seealso 
+#' \code{\link{SubsetSimulation}}
+#' \code{\link{MonteCarlo}}
+#' \code{\link[e1071]{svm}} (in package \pkg{e1071})
+#' \code{\link{S2MART}}
+#' 
+#' @export
 SMART = function(dimension,
+                 #' @param dimension the dimension of the input space
                  lsf,
-                 N1 = 10000,                     # Number of samples for the (L)ocalisation step
-                 N2 = 50000,                     # Number of samples for the (S)tabilisation step
-                 N3 = 200000,                    # Number of samples for the (C)onvergence step
-                 Nu = 50,                        # Size of the first Design of Experiments
-                 lambda1 = 7,                    # Relaxing parameter for MH algorithm at step L
-                 lambda2 = 3.5,                  # Relaxing parameter for MH algorithm at step S
-                 lambda3 = 1,                    # Relaxing parameter for MH algorithm at step C
-                 tune_cost = c(1,10,100,1000),   # Input for tuning cost paramter of the SVM
-                 tune_gamma = c(0.5,0.2,0.1,0.05,0.02,0.01), # Input for tuning gamma parameter of the SVM
-                 clusterInMargin = TRUE,         # Enforce selected clusterised points to be in margin
+                 #' @param lsf the limit-state function
+                 N1 = 10000,
+                 #' @param N1 Number of samples for the (L)ocalisation step
+                 N2 = 50000,
+                 #' @param N2 Number of samples for the (S)tabilisation step
+                 N3 = 200000,
+                 #' @param N3 Number of samples for the (C)onvergence step
+                 Nu = 50,
+                 #' @param Nu Size of the first Design of Experiments
+                 lambda1 = 7,
+                 #' @param lambda1 Relaxing parameter for MH algorithm at step L
+                 lambda2 = 3.5,
+                 #' @param lambda2 Relaxing parameter for MH algorithm at step S
+                 lambda3 = 1,
+                 #' @param lambda3 Relaxing parameter for MH algorithm at step C
+                 tune_cost = c(1,10,100,1000),
+                 #' @param tune_cost Input for tuning cost paramter of the SVM
+                 tune_gamma = c(0.5,0.2,0.1,0.05,0.02,0.01),
+                 #' @param tune_gamma Input for tuning gamma parameter of the SVM
+                 clusterInMargin = TRUE,
+                 #' @param clusterInMargin Enforce selected clusterised points to be in margin
                  alpha_margin = 1,
+                 #' @param alpha_margin a real value defining the margin. While
+                 #' 1 is the \sQuote{real} margin for a SVM, one can decide here to
+                 #' stretch it a bit.
                  #Localization, Convergence and Stabilization bounds
-                 k1 = round(6*(dimension/2)^(0.2)), # Rank of the first iteration of step S
-                 k2 = round(12*(dimension/2)^(0.2)), # Rank of the first iteration of step C
-                 k3 = k2 + 16,                  # Rank of the last iteration of step C
+                 k1 = round(6*(dimension/2)^(0.2)),
+                 #' @param k1 Rank of the first iteration of step S
+                 k2 = round(12*(dimension/2)^(0.2)),
+                 #' @param k2 Rank of the first iteration of step C
+                 k3 = k2 + 16,
+                 #' @param k3 Rank of the last iteration of step C
                  #Arguments for SMART used in Subset simulation
-                 X  = NULL,              # Coordinates of alredy known points
-                 y = NULL,              # Value of the LSF on these points
-                 failure   = 0,                 # Failure threshold
-                 limit_fun_MH = NULL,           # Define an area of exclusion with a limit function, eg in metaSS
-                 sampling_strategy = "MH",      # Either MH for Metropolis-Hastings of AR for accept-reject
-                 seeds = NULL,                  # If some points are already known to be in the appropriate subdomain, eg in metaSS
-                 seeds_eval = NULL,             # Value of the metamodel on these points
-                 burnin = 20,                   # Burnin parameter for MH
-                 thinning = 4,                  # Thinning parameter for MH
-                 plot = FALSE,                  # Set to TRUE for a full plot, ie refresh at each iteration
-                 limited_plot = FALSE,          # Set to TRUE for a final plot with final DOE, metamodel and LSF
-                 add = FALSE,                   # If plots are to be added to a current device
-                 output_dir = NULL,             # If plots are to be saved in jpeg in a given directory
-                 z_MH = NULL,                   # For plots, if metamodel has already been evaluated on the grid
-                 z_lsf = NULL,                  # For plots, if LSF has already been evaluated on the grid
-                 verbose = 0) {                 # Either 0 for almost no output, 1 for medium size output and 2 for all outputs
+                 X  = NULL,
+                 #' @param X Coordinates of alredy known points
+                 y = NULL,
+                 #' @param y Value of the LSF on these points
+                 failure   = 0,
+                 #' @param failure Failure threshold
+                 limit_fun_MH = NULL,
+                 #' @param limit_fun_MH Define an area of exclusion with a limit function
+                 sampling_strategy = "MH",
+                 #' @param sampling_strategy Either MH for Metropolis-Hastings of AR for accept-reject
+                 seeds = NULL,
+                 #' @param seeds If some points are already known to be in the subdomain defined
+                 #' by \code{limit_fun_MH}
+                 seeds_eval = NULL,
+                 #' @param seeds_eval Value of the metamodel on these points
+                 burnin = 20,
+                 #' @param burnin Burnin parameter for MH
+                 thinning = 4,
+                 #' @param thinning Thinning parameter for MH
+                 plot = FALSE,
+                 #' @param plot Set to TRUE for a full plot, ie. refresh at each iteration
+                 limited_plot = FALSE,
+                 #' @param limited_plot Set to TRUE for a final plot with final DOE, metamodel and LSF
+                 add = FALSE,
+                 #' @param add If plots are to be added to the current device
+                 output_dir = NULL,
+                 #' @param output_dir If plots are to be saved in jpeg in a given directory
+                 z_MH = NULL,
+                 #' @param z_MH For plots, if the limit_fun_MH has already been evaluated on the grid
+                 z_lsf = NULL,
+                 #' @param z_lsf For plots, if LSF has already been evaluated on the grid
+                 verbose = 0) {
+  #' @param verbose Either 0 for almost no output, 1 for medium size output and 2
+  #' for all outputs
   
   
   cat("===================================\n")
@@ -75,11 +161,11 @@ SMART = function(dimension,
            Nmargin=NA,
            Nswitch=NA,
            Nclose=NA,
-           Nu=NA*c(1:Nu))
+           Nu=NA)
   #G_meta stands for the value of the surrogate on these points
-  G_meta = list(N1=NA*c(1:N1),
-                N2=NA*c(1:N2),
-                N3=NA*c(1:N3))
+  G_meta = list(N1=NA,
+                N2=NA,
+                N3=NA)
   
   # cat(" ============================================= \n")
   cat(" STEP 1 : EVALUATION OF A FIRST METAMODEL \n")
@@ -100,9 +186,17 @@ SMART = function(dimension,
   else{
     if(sampling_strategy=="MH"){
       if(verbose>0){cat(" * Generate N1 =",N1,"points from seeds with l1r-mM algorithm\n")}
-      gen_pop = generateWithlrmM(seeds=seeds$N1,seeds_eval=seeds_eval$N1,N=N1,lambda=lambda1,limit_f=limit_fun_MH,burnin=0,thinning=0)
+      gen_pop = generateWithlrmM(seeds=seeds$N1,
+                                 seeds_eval=seeds_eval$N1,
+                                 N=N1,
+                                 lambda=lambda1,
+                                 limit_f=limit_fun_MH,
+                                 burnin=0,
+                                 thinning=0)
       U$N1 = gen_pop$points
       G_meta$N1 = gen_pop$eval
+      # U$N1 <- generateK(X = seeds$N1, N = N1, lsf = function(x) limit_fun_MH(x)$mean < 0)
+      # G_meta$N1 <- limit_fun_MH(U$N1)$mean
       if(verbose>0){cat(" * Get Nu =",Nu,"points by clustering of the N1 points\n")}
       U$Nu = t(kmeans(t(U$N1), centers=Nu,iter.max=30)$centers)
     }
@@ -158,12 +252,14 @@ SMART = function(dimension,
   #add points to the learning database
   if(verbose>0){cat(" * Add points to the learning database\n")}
   if(is.null(X)){
-    X = cbind(seq(0,0,l=dimension),U$Nu)
+    X = cbind(seq(0,0,l=dimension),U$Nu); dimnames(X) <- NULL;
+    dimnames(X) <- NULL
     g0 = lsf(as.matrix(seq(0,0,l=dimension)));Ncall = Ncall + 1;#this is to insure consistency between model sign and lsf sign
     G$g = c(g0,G$Nu)
   }
   else{
-    X = cbind(X,U$Nu)
+    X = cbind(X,U$Nu); dimnames(X) <- NULL;
+    dimnames(X) <- NULL
     G$g = c(y,G$Nu)
   }
   
@@ -241,6 +337,7 @@ SMART = function(dimension,
                                       lambda=lambda,
                                       limit_f=limit_fun_MH,
                                       burnin=0,thinning=0)$points
+        # U[[stage]] = generateK(X = seeds[[stage]], N = N, lsf = function(x) limit_fun_MH(x)$mean < 0)
       }
       else{
         if(verbose>0){cat(" * Generate N =",N,"points with an accept-reject strategy\n")}
@@ -282,7 +379,7 @@ SMART = function(dimension,
         G$Nmargin <- lsf(U$Nmargin);Ncall = Ncall + Nmargin
         #Add points U$Nmargin to the learning database
         if(verbose>0){cat(" * Add points to the learning database\n")}
-        X <- cbind(X,U$Nmargin)
+        X <- cbind(X,U$Nmargin); dimnames(X) <- NULL;
         G$g = c(G$g,G$Nmargin)
         
         #plotting part
@@ -323,7 +420,7 @@ SMART = function(dimension,
         G$Nswitch = lsf(U$Nswitch);Ncall = Ncall + Nswitch
         #Add points U$Nmargin + U$Nswitch to the learning database
         if(verbose>0){cat(" * Add points U$Nswitch  to the learning database\n")}
-        X = cbind(X,U$Nswitch)
+        X = cbind(X,U$Nswitch); dimnames(X) <- NULL;
         G$g = c(G$g,G$Nswitch)
         
         if(plot==TRUE){
@@ -355,7 +452,7 @@ SMART = function(dimension,
       G$Nclose = lsf(U$Nclose);Ncall = Ncall + Nclose
       #Add points U$Nclose to the learning database
       if(verbose>0){cat(" * Add points U$Nclose to the learning database\n")}
-      X = cbind(X,U$Nclose)
+      X = cbind(X,U$Nclose); dimnames(X) <- NULL;
       G$g = c(G$g,G$Nclose)
       
       if(plot==TRUE){
@@ -400,12 +497,15 @@ SMART = function(dimension,
                                 lambda=lambda,
                                 limit_f=limit_fun_MH,
                                 burnin=burnin,thinning=thinning,
-                                VA_function=function(x){1*(meta_fun(x)$mean<0)})
+                                VA_function=function(x){1*(meta_fun(x)$mean<0)})$points
+    # gen_pop <- generateK(X = seeds$N3, N = N, lsf = function(x) limit_fun_MH(x)$mean < 0)
     # )
-    fail_points = (gen_pop$VA_values==1)
-    points=gen_pop$points[,fail_points]
-    meta_eval= meta_fun(points)$mean
-    MC_est = gen_pop$est
+    meta_eval <- limit_fun_MH(gen_pop)$mean
+    fail_points = (meta_eval<0)
+    points=gen_pop[,fail_points]
+    # meta_eval= meta_fun(points)$mean
+    # MC_est = gen_pop$est
+    MC_est <- mean(fail_points)
   }
   else{
     G_meta$N3 = meta_fun(U$N3)$mean
@@ -435,19 +535,32 @@ SMART = function(dimension,
   cat(" * cov =",MC_delta,"\n")
   # cat(" * Markov chain gamma =",MC_gamma,"\n")
   
+  #' @return
+  #'   An object of class \code{list} containing the failure probability and some more outputs as described below:
+  
   res = list(proba = MC_est,
+             #' \item{proba}{The estimated failure probability.}
              cov = MC_delta,
-             # gamma=MC_gamma,
+             #' \item{cov}{The coefficient of variation of the Monte-Carlo probability estimate.}
              Ncall = Ncall,
+             #' \item{Ncall}{The total number of calls to the \code{limit_state_function}.}
              X = X,
+             #' \item{X}{The final learning database, ie. all points where \code{lsf} has been calculated.}
              y = G$g,
+             #' \item{y}{The value of the \code{limit_state_function} on the learning database.}
              meta_fun = meta_fun,
+             #' \item{meta_fun}{The metamodel approximation of the \code{limit_state_function}.
+             #' A call output is a list containing the value and the standard deviation.}
              meta_model = meta_model,
+             #' \item{meta_model}{The final metamodel.}
              points = points,
+             #' \item{points}{Points in the failure domain according to the metamodel.}
              meta_eval = meta_eval)
+  #'   \item{meta_eval}{Evaluation of the metamodel on these points.}
   
   if(plot+limited_plot) {
     res = c(res,list(z_meta=z_meta$mean))
+    #'   \item{z_meta}{If \code{plot}==TRUE, the evaluation of the metamodel on the plot grid.}
   }
   
   return(res)

@@ -191,11 +191,9 @@ In the end, the cluster has to be closed with:
 parallel::stopCluster(cl)
 ```
 The other option for Unix OS is `doMC`. The main difference is that the cluster is made by _forking_ the current master session, ie. that the sub-sessions are a copy of the current session, including all the variables defined in the `.GlobalEnv`. It is easier to initialise and more robust (SNOW can miss variable even though `foreach` tries an automatic export of the necessary ones):
-```{r foreach-doMC}
-doMC::registerDoMC(1)
-# Control that everything is set properly
-foreach::getDoParName()
-foreach::getDoParWorkers()
+```r
+# default behaviour if n not specified explained in the help page
+doMC::registerDoMC()
 ```
 Here there is no need to close the cluster because it is created on-the-fly for each instance of the `foreach` loop.
 
@@ -290,6 +288,7 @@ In other words, each element is generated conditionally greater than the previou
 Since the algorithm generates iid realisations of such a random walk, it is especially suited for using with parallel computing. Hence the code includes a `foreach` loop and will directely benefit from a parallel backend.
 
 ```{r MP}
+foreach::registerDoSEQ()
 mp <- mistral::MP(dimension = 2,  lsf = mistral::kiureghian, q = 0, N = 1e2)
 ```
 One can compare this result with the one got from `SubsetSimulation` in terms of coefficient of variation against total number of calls.
@@ -421,19 +420,19 @@ Note however that this discretisation makes the algorithm generating quite huge 
 akmcs <- mistral::AKMCS(dimension = 2, lsf = mistral::waarts, N = 3e5, plot = TRUE, Nmax = 10)
 ```
 
-### The `S2MART` method
+<!-- ### The `S2MART` method -->
 
-_S$^2$MART_, for Subset by Support vector Margin Algorithm for Reliability esTimation, is combination of a statistical technique called `Subset Simulation` (see above) and a learning approache based on Support Vector Machines.s
+<!-- _S$^2$MART_, for Subset by Support vector Margin Algorithm for Reliability esTimation, is combination of a statistical technique called `Subset Simulation` (see above) and a learning approache based on Support Vector Machines.s -->
 
-The core concept is to used a _small_ population in the `Subset Simulation` algorithm in order to define the sequence of intermediate thresholds. But instead of estimating the conditional probability directly with the _iid_ population, it starts a learning algorithm based on SVM, originally called `SMART` on the current threshold. In the end, the conditional probability is estimated with the boundary predicted by the SVM instead of using the code $g$. Note that this original method, referred to as `SMART` is accessible directly by using the triple dot command: `mistral:::SMART` although it is not recommended by the author.
+<!-- The core concept is to used a _small_ population in the `Subset Simulation` algorithm in order to define the sequence of intermediate thresholds. But instead of estimating the conditional probability directly with the _iid_ population, it starts a learning algorithm based on SVM, originally called `SMART` on the current threshold. In the end, the conditional probability is estimated with the boundary predicted by the SVM instead of using the code $g$. Note that this original method, referred to as `SMART` is accessible directly by using the triple dot command: `mistral:::SMART` although it is not recommended by the author. -->
 
-This sequential approache allows this method to be used for extreme event, unlike `AKMCS` for instance. In the end, a lot of practical parameters can be set but default values are the ones set up by the author and should be modified very carefully as their meaning and impact is rather unclear.
+<!-- This sequential approache allows this method to be used for extreme event, unlike `AKMCS` for instance. In the end, a lot of practical parameters can be set but default values are the ones set up by the author and should be modified very carefully as their meaning and impact is rather unclear. -->
 
-```{r S2MART, fig.keep="all", fig.show="animate"}
-smart <- mistral::S2MART(dimension = 2, lsf = mistral::waarts, failure = -2,
-                        k1 = 3, k2 = 5, k3 = 6,
-                        plot = TRUE)
-```
+<!-- ```{r S2MART, fig.keep="all", fig.show="animate"} -->
+<!-- smart <- S2MART(dimension = 2, lsf = mistral::waarts, failure = -2, -->
+<!--                 k1 = 3, k2 = 5, k3 = 7, -->
+<!--                         plot = TRUE) -->
+<!-- ``` -->
 
 ### The `BMP` method
 

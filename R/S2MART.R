@@ -206,6 +206,7 @@ S2MART = function(dimension,
                               seeds_eval = G$Nn[G$Nn<y0],
                               N = Nn,
                               limit_f = meta_fun[[i-1]])$points
+      # U$Nn <- generateK(X = U$Nn[,G$Nn<y0], N = Nn, lsf = function(x) meta_fun[[i-1]](x)$mean < 0)
     }
     
     # Assessment of g on these points
@@ -220,12 +221,12 @@ S2MART = function(dimension,
     if(verbose>0){cat(" * Add points U$Nn to the learning database\n\n")}
     if(i==1) {
       # first sample always the origin to insure consistency in the SVM classifier
-      X = cbind(seq(0,0,l=dimension),U$Nn)
+      X = cbind(seq(0,0,l=dimension),U$Nn); dimnames(X) <- NULL;
       g0 = lsf(as.matrix(seq(0,0,l=dimension))); Ncall = Ncall + 1;
       G$g = c(g0,G$Nn)
     }
     else {
-      X = cbind(X,U$Nn)
+      X = cbind(X,U$Nn); dimnames(X) <- NULL;
       G$g = c(G$g,G$Nn)
     }
     rownames(X) <- rep(c('x', 'y'), length.out = dimension)
