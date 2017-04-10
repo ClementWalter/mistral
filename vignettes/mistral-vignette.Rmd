@@ -135,7 +135,7 @@ lsf <- function(x){
 }
 ```
 
-When parallel computing is availble, it is then possible to make a parallel calculation of a batch of points given as a matrix. Let us give an example using the [`foreach`](https://cran.r-project.org/package=foreach) and [`iterators`](https://cran.r-project.org/web/packages/iterators/index.html) packages (we recommand the user to read their very nice [vignettes](https://cran.r-project.org/web/packages/foreach/vignettes/foreach.pdf) to get started with the `foreach` loop, which is useful not only for parallel computing but also as a nice alternative to the `*apply` family).
+When parallel computing is availble, it is then possible to make a parallel calculation of a batch of points given as a matrix. Let us give an example using the [`foreach`](https://cran.r-project.org/package=foreach) and [`iterators`](https://cran.r-project.org/package=iterators) packages (we recommand the user to read their very nice [vignettes](https://cran.r-project.org/package=foreach) to get started with the `foreach` loop, which is useful not only for parallel computing but also as a nice alternative to the `*apply` family).
 ```{r lsf-foreach}
 require(foreach)
 lsf <- function(x){
@@ -174,7 +174,7 @@ With R, the management of these _parallel_ tasks is let to the task manager of t
 
 There are two main possible frameworks for parallel computing: OpenMP and MPI. Without digging to much into the details, OpenMP lets you use the several cores of one given _computer_ (one shared memory) while MPI allows for using several computers connected with a bus.
 
-Let us first focus on OpenMP. Depending on the OS of the workstation (Windows or Mac/Linux), you can use either [`doSNOW`](https://cran.r-project.org/web/packages/doSNOW/index.html)  or [`doMC`](https://cran.r-project.org/web/packages/doMC/doMC.pdf). SNOW (Simple Network of Workstations) is available for both Windows and Unix OS. It requires to first create a cluster with base package `parallel::makeCluster()`. This means that the subsequent R sessions (slave sessions in parallel terminology) are created once for all in the beginning. It is like opening several R sessions by hand: looking at your task manager you will see as many R processes as the size of the requested cluster.
+Let us first focus on OpenMP. Depending on the OS of the workstation (Windows or Mac/Linux), you can use either [`doSNOW`](https://cran.r-project.org/package=doSNOW)  or [`doMC`](https://cran.r-project.org/package=doMC). SNOW (Simple Network of Workstations) is available for both Windows and Unix OS. It requires to first create a cluster with base package `parallel::makeCluster()`. This means that the subsequent R sessions (slave sessions in parallel terminology) are created once for all in the beginning. It is like opening several R sessions by hand: looking at your task manager you will see as many R processes as the size of the requested cluster.
 ```{r foreach-registerDoSNOW}
 # return the number of cores of the computer
 n <- parallel::detectCores()
@@ -321,8 +321,8 @@ In the previous section, we have shown some statistical tools to estimate probab
 In `mistral` there are basically three types of metamodel implemented:
 
 * linear model: the `FORM` method _replaces_ the model $g$ with a hyperplane crossing the so-called _Most Probable Failure Point_. This point is, in the standard space, the failing sample the closest to the origin.
-* Support-Vector Machine (SVM): this classifier is used in the `S2MART` method and relies on the [`e1071::svm`](https://cran.r-project.org/web/packages/e1071/index.html) function.
-* Gaussian process regession; this is used in `MetaIS`, `AKMCS` and `BMP`. Here the model $g$ is _replaced_ by a Gaussian random process with known distribution. The regression is carried out using the [`DiceKriging`](http://cran.r-project.org/web/packages/DiceKriging/index.html) package.
+* Support-Vector Machine (SVM): this classifier is used in the `S2MART` method and relies on the [`e1071::svm`](https://cran.r-project.org/package=e1071) function.
+* Gaussian process regession; this is used in `MetaIS`, `AKMCS` and `BMP`. Here the model $g$ is _replaced_ by a Gaussian random process with known distribution. The regression is carried out using the [`DiceKriging`](https://cran.r-project.org/package=DiceKriging) package.
 
 ### Short tutorial on the metamodels used
 
@@ -340,7 +340,7 @@ X.test <- data.frame(x1=rnorm(1), x2=rnorm(1))
 predict(svm.model, X.test)
 sum(X.test^2)
 ```
-The interested reader is referred to the [`e1071::svm` vignette](https://cran.r-project.org/web/packages/e1071/vignettes/svmdoc.pdf) for more details about SVM.
+The interested reader is referred to the [`e1071::svm` vignette](https://cran.r-project.org/package=e1071) for more details about SVM.
 
 #### Kriging
 
