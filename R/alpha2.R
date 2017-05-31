@@ -1,3 +1,4 @@
+# To estimate E[\alpha^2]
 alpha2 <- function(PPP, model, xi, q){
   X <- PPP$final_X
   U <- PPP$final_U
