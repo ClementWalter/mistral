@@ -110,9 +110,6 @@ lsf <- function(x) -1*kiureghian(x)
 fail.samp <- IRW(2, lsf, q = 0, N = 10, plot = TRUE)
 }
 }
-\author{
-Clement WALTER \email{clementwalter@icloud.com}
-}
 \references{
 \itemize{
 \item C. Walter:\cr
@@ -142,4 +139,6 @@ Applied Mathematics \& Optimization, 64(2), 171-196.
 \seealso{
 \code{\link{MP}}
 }
-
+\author{
+Clement WALTER \email{clementwalter@icloud.com}
+}

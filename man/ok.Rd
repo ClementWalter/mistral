@@ -69,4 +69,3 @@ predict(krig, data.frame(x1=X[1], x2=X[2]), type="UK")[c('mean', 'sd')]
 \author{
 Clement WALTER \email{clementwalter@icloud.com}
 }
-

@@ -115,9 +115,6 @@ lsf_par = function(x){
 }
 
 }
-\author{
-Clement WALTER \email{clementwalter@icloud.com}
-}
 \references{
 \itemize{
    \item
@@ -130,4 +127,6 @@ Clement WALTER \email{clementwalter@icloud.com}
 \code{\link{SubsetSimulation}}
 \code{\link{foreach}}
 }
-
+\author{
+Clement WALTER \email{clementwalter@icloud.com}
+}

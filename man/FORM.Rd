@@ -77,9 +77,6 @@ form.IS$p
 }
 
 }
-\author{
-Vincent MOUTOUSSAMY and Clement WALTER \email{clementwalter@icloud.com}
-}
 \references{
 \itemize{
 \item
@@ -88,4 +85,6 @@ O. Ditlevsen and H.O. Madsen. Structural reliability methods, Wiley, 1996\cr
 M. Lemaire, A. Chateauneuf and J. Mitteau. Structural reliability, Wiley Online Library, 2009.\cr
 }
 }
-
+\author{
+Vincent MOUTOUSSAMY and Clement WALTER \email{clementwalter@icloud.com}
+}

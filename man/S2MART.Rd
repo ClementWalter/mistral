@@ -108,9 +108,6 @@ computation; see examples in \link{MonteCarlo}.
 }
 
 }
-\author{
-Clement WALTER \email{clementwalter@icloud.com}
-}
 \references{
 \itemize{
   \item
@@ -146,4 +143,6 @@ Clement WALTER \email{clementwalter@icloud.com}
 \code{\link[DiceKriging]{km}} (in package \pkg{DiceKriging})
 \code{\link[e1071]{svm}} (in package \pkg{e1071})
 }
-
+\author{
+Clement WALTER \email{clementwalter@icloud.com}
+}

@@ -21,4 +21,3 @@ A list containing the following elements
 \description{
 precomputeUpdateData
 }
-

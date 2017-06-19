@@ -1,7 +1,7 @@
 #' EstimateSUR
 #'
 #' A function for estimating a SUR criterion with a realisation of a PPP
-# @importFrom Rcpp sourceCpp
+# @importFrom Rcpp sourceCpp evalCpp
 # @useDynLib BMP
 estimateSUR <- function(PPP,
                         #' @param PPP the Poisson point process generated to get alpha.

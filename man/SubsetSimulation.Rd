@@ -127,9 +127,6 @@ colMeans(t(comp[3:4,])) # check similar number of calls
 }
 
 }
-\author{
-Clement WALTER \email{clementwalter@icloud.com}
-}
 \references{
 \itemize{
    \item
@@ -150,4 +147,6 @@ Clement WALTER \email{clementwalter@icloud.com}
 \code{\link{MP}}
 \code{\link{MonteCarlo}}
 }
-
+\author{
+Clement WALTER \email{clementwalter@icloud.com}
+}

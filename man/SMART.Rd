@@ -123,9 +123,6 @@ to do so.
 Furthermore, each time a set of vector is defined as a matrix,
 \sQuote{nrow} = \code{dimension} and \sQuote{ncol} = number of vector.
 }
-\author{
-Clement WALTER \email{clementwalter@icloud.com}
-}
 \references{
 \itemize{
 \item
@@ -145,4 +142,6 @@ F. Deheeger:\cr
 \code{\link[e1071]{svm}} (in package \pkg{e1071})
 \code{\link{S2MART}}
 }
-
+\author{
+Clement WALTER \email{clementwalter@icloud.com}
+}

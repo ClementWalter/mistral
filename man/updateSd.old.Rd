@@ -22,4 +22,3 @@ of the points to be added to the metamodel learning database.}
 \description{
 UpdateSd.old
 }
-

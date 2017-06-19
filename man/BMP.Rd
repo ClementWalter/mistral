@@ -135,9 +135,6 @@ functions.
 \dontrun{p <- BMP(dimension = 2, lsf = cantilever, q = 1/325, N = 100, N.iter = 30, plot = TRUE)}
 
 }
-\author{
-Clement WALTER \email{clementwalter@icloud.com}
-}
 \references{
 \itemize{
    \item A. Guyader, N. Hengartner and E. Matzner-Lober:\cr
@@ -160,4 +157,6 @@ Clement WALTER \email{clementwalter@icloud.com}
 \code{\link{IRW}}
 \code{\link{MP}}
 }
-
+\author{
+Clement WALTER \email{clementwalter@icloud.com}
+}

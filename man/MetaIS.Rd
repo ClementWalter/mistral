@@ -200,9 +200,6 @@ cov = sqrt((1-P)/(N*P))
 }
 
 }
-\author{
-Clement WALTER \email{clementwalter@icloud.com}
-}
 \references{
 \itemize{
   \item
@@ -235,4 +232,6 @@ Clement WALTER \email{clementwalter@icloud.com}
 \code{\link{MonteCarlo}}
 \code{\link[DiceKriging]{km}} (in package \pkg{DiceKriging})
 }
-
+\author{
+Clement WALTER \email{clementwalter@icloud.com}
+}

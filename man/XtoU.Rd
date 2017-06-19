@@ -19,10 +19,9 @@ functions of all random variables to be used}
 XtoU lets transform datapoint in the original space X to the standard Gaussian
 space U with isoprobalisitc transformation.
 }
-\author{
-Clement WALTER \email{clement.walter@cea.fr}
-}
 \seealso{
 \code{UtoX}
 }
-
+\author{
+Clement WALTER \email{clement.walter@cea.fr}
+}

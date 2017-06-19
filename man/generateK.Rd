@@ -53,4 +53,3 @@ ggplot(as.data.frame(t(X)), aes(x_1,x_2)) + geom_point()
 \author{
 Clement WALTER \email{clementwalter@icloud.com}
 }
-

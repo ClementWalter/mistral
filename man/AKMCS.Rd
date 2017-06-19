@@ -177,9 +177,6 @@ cov = sqrt((1-P)/(N*P))
 }
 
 }
-\author{
-Clement WALTER \email{clementwalter@icloud.com}
-}
 \references{
 \itemize{
 \item
@@ -206,4 +203,6 @@ International Journal of Fatigue, 2014\cr
 \code{\link{MetaIS}}
 \code{\link[DiceKriging]{km}} (in package \pkg{DiceKriging})
 }
-
+\author{
+Clement WALTER \email{clementwalter@icloud.com}
+}

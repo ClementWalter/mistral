@@ -2,7 +2,7 @@
 title: "Using mistral for reliability analysis"
 author: "Clément Walter"
 date: '`r Sys.Date()`'
-output: rmarkdown::pdf_document
+output: rmarkdown::html_document
 vignette: >
   %\VignetteIndexEntry{Using mistral for reliability analysis}
   %\VignetteEngine{knitr::rmarkdown}

@@ -26,4 +26,3 @@ a vector containing the kriging sd at points \code{integration.points}
 \description{
 Update kriging variance when adding new points to the DoE
 }
-

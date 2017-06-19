@@ -62,4 +62,3 @@ the authors of \code{SMART} suggest its use (\code{lambda > 1}) for the explorat
 Note such a value disable to possiblity to use the output population for Monte Carlo
 estimation.
 }
-

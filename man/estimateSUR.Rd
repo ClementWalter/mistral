@@ -47,4 +47,3 @@ a list containing the points minimising the criterion
 \description{
 A function for estimating a SUR criterion with a realisation of a PPP
 }
-
