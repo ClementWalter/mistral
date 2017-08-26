@@ -93,7 +93,7 @@ MP = function(dimension,
               N.batch = foreach::getDoParWorkers(),
               #' @param N.batch the number of parallel batches for the algorithm. Each batch will then
               #' have \code{N/N.batch} particles. Typically this could be \code{detectCores()} or some
-              #' other machine-derived parameters.
+              #' other machine-derived parameters. Note that \code{N/N.batch} has to be an integer.
               p,
               #' @param p a given probability to estimate the corresponding quantile (as in qxxxx functions).
               q,
