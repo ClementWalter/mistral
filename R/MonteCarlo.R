@@ -154,7 +154,7 @@ MonteCarlo = function(dimension,
     df_plot = data.frame(expand.grid(x=xplot, y=yplot), z = lsf(t(expand.grid(x=xplot, y=yplot))))
     p <- ggplot(data = df_plot, aes(x,y))
     indCol = (G>q)+1
-    p <- p + geom_contour(aes(z=z, color = ..level..), breaks = 0) +
+    p <- p + geom_contour(aes(z=z, color = ..level..), breaks = q) +
       geom_point(data = data.frame(t(U), z = G, ind = indCol), colour = factor(indCol)) +
       theme(legend.position = "none") +
       xlim(-8, 8) + ylim(-8, 8)
