@@ -28,7 +28,7 @@ getPPP <- function(dimension,
   sigma_hist <- sigma <- 0.3
   K = function(x){
     x = as.matrix(x);dimnames(x) <- NULL;
-    w = matrix(rnorm(x), nrow = dimension)
+    w = matrix(rnorm(length(x)), nrow = dimension)
     x_star = (x + sigma*w)/(sqrt(1+sigma^2))
   }
 
@@ -77,7 +77,7 @@ getPPP <- function(dimension,
           U_pop[accept] = U_star[accept]
           acceptance = acceptance + sum(accept)
         }
-        X_pop = as.matrix(X_pop[,U_pop!=U[ind_star]])
+        X_pop = matrix(X_pop[,U_pop!=U[ind_star]], nrow = nrow(X_pop))
         U_pop = U_pop[U_pop!=U[ind_star]]
         #         acceptance = acceptance/burnin/N
         #         if(acceptance<0.2) sigma = sigma*0.9
@@ -91,7 +91,7 @@ getPPP <- function(dimension,
         Nmove_dis = M
         while(sum(keep)>0 && (U[x_min]<q) && (M-Nmove_dis<dimension)) {
           # get conditional population
-          X_pop = as.matrix(X_pop[,keep])
+          X_pop = matrix(X_pop[,keep], nrow = nrow(X_pop))
           U_pop = U_pop[keep]
 
           # sample new event with the discretised distribution
@@ -106,7 +106,7 @@ getPPP <- function(dimension,
           }
           M = M + 1
           U_pop <- U_pop[-ind]
-          X_pop <- as.matrix(X_pop[,-ind])
+          X_pop <- matrix(X_pop[,-ind], nrow = nrow(X_pop))
 
           # prepare next step
           x_min = which.min(U)
@@ -117,7 +117,7 @@ getPPP <- function(dimension,
       }
       if(Niter==Niter_max(N)) warning("In PPP generation: maximum number of iterations reached")
       ind_ppp <- PPP_U<q
-      list(PPP_X = PPP_X[,ind_ppp], PPP_U = PPP_U[ind_ppp], final_X = X, final_U = U, M = M, sigma = sigma_hist)
+      list(PPP_X = matrix(PPP_X[,ind_ppp], nrow = nrow(PPP_X)), PPP_U = PPP_U[ind_ppp], final_X = X, final_U = U, M = M, sigma = sigma_hist)
     }
   M = sum(sapply(PPP, function(l) {l$M}))
   sigma = sapply(PPP, function(l) {l$sigma})
@@ -129,10 +129,10 @@ getPPP <- function(dimension,
 
   if(sorted==TRUE){
     PPP_U <- sort(PPP_U, index.return = TRUE)
-    PPP_X <- PPP_X[,PPP_U$ix]
+    PPP_X <- matrix(PPP_X[,PPP_U$ix], nrow = nrow(PPP_X))
     PPP_U <- PPP_U$x
     final_U <- sort(final_U, index.return = TRUE)
-    final_X <- final_X[,final_U$ix]
+    final_X <- matrix(final_X[,final_U$ix], nrow = nrow(final_X))
     final_U <- final_U$x
   }
 

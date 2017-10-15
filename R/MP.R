@@ -342,6 +342,8 @@ MP = function(dimension,
              #' \item{cv}{the coefficient of variation of the probability estimator.}
              ecdf = ecdf_MP,
              #' \item{ecdf}{the empirical cdf.}
+             L = L,
+             #' \item{L}{the states of the random walk.}
              L_max = L_max,
              #' \item{L_max}{the farthest state reached by the random process. Validity range
              #' for the \code{ecdf} is then (-Inf, L_max] or [L_max, Inf).}
