@@ -3,3 +3,4 @@
 figure$
 cache$
 ^\.travis\.yml$
+cran-comments.md

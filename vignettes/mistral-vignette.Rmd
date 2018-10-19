@@ -175,7 +175,7 @@ With R, the management of these _parallel_ tasks is let to the task manager of t
 There are two main possible frameworks for parallel computing: OpenMP and MPI. Without digging to much into the details, OpenMP lets you use the several cores of one given _computer_ (one shared memory) while MPI allows for using several computers connected with a bus.
 
 Let us first focus on OpenMP. Depending on the OS of the workstation (Windows or Mac/Linux), you can use either [`doSNOW`](https://cran.r-project.org/package=doSNOW)  or [`doMC`](https://cran.r-project.org/package=doMC). SNOW (Simple Network of Workstations) is available for both Windows and Unix OS. It requires to first create a cluster with base package `parallel::makeCluster()`. This means that the subsequent R sessions (slave sessions in parallel terminology) are created once for all in the beginning. It is like opening several R sessions by hand: looking at your task manager you will see as many R processes as the size of the requested cluster.
-```{r foreach-registerDoSNOW}
+```r
 # return the number of cores of the computer
 n <- parallel::detectCores()
 # default behaviour if n not specified explained in the help page
@@ -187,7 +187,7 @@ foreach::getDoParName()
 foreach::getDoParWorkers()
 ```
 In the end, the cluster has to be closed with:
-```{r foreach-stopCluster}
+```r
 parallel::stopCluster(cl)
 ```
 The other option for Unix OS is `doMC`. The main difference is that the cluster is made by _forking_ the current master session, ie. that the sub-sessions are a copy of the current session, including all the variables defined in the `.GlobalEnv`. It is easier to initialise and more robust (SNOW can miss variable even though `foreach` tries an automatic export of the necessary ones):
