@@ -51,6 +51,7 @@ An object of class \code{list} containing the outputs described below:
 \item{q}{the estimated quantile or the reference for the probability estimate.}
 \item{cv}{the coefficient of variation of the probability estimator.}
 \item{ecdf}{the empirical cdf.}
+\item{L}{the states of the random walk.}
 \item{L_max}{the farthest state reached by the random process. Validity range
 for the \code{ecdf} is then (-Inf, L_max] or [L_max, Inf).}
 \item{times}{the \emph{times} of the random process.}

@@ -2,3 +2,4 @@
 ^\.Rproj\.user$
 figure$
 cache$
+^\.travis\.yml$
