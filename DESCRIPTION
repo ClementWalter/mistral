@@ -2,7 +2,7 @@ Package: mistral
 Type: Package
 Title: Methods in Structural Reliability
 Version: 2.2.1
-Date: 2017-03-11
+Date: 2018-10-18
 Author: Clement WALTER, Gilles DEFAUX, Bertrand IOOSS, Vincent MOUTOUSSAMY with contributions from Nicolas BOUSQUET, Claire CANNAMELA and Paul LEMAITRE
 Maintainer: Clement WALTER <clementwalter@icloud.com>
 Depends: R (>= 3.0.0)
