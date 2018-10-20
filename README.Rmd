@@ -1,0 +1,21 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+This package embeds various methods for Bayesian inference :
+
+1. computing failure probability (probability that the output of a numerical model exceeds a threshold)
+2. computing quantile of low or high-order (optimization with confidence interval)
+3. conditional mean estimation with Nested Sampling
+3. Cdf estimation over an interval of the form $(-\infty, q]$ with Poisson processes
+3. Wilks formula to compute quantile(s) from a sample or the size of the required i.i.d. sample.
