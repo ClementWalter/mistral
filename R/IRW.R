@@ -17,7 +17,7 @@
 #' such as nested sampling, Last Particle Algorithm or Tootsie Pop Algorithm.
 #' 
 #' Bascially for \code{N = 1}, it generates a sample \eqn{Y = lsf(X)} and iteratively
-#' regenerates greater than the sought value: \eqn{Y_{n+1} \sim \mu^Y( \cdot \mid Y > Y_n}. This
+#' regenerates greater than the found value: \eqn{Y_{n+1} \sim \mu^Y( \cdot \mid Y > Y_n}. This
 #' regeneration step is done with a Metropolis-Hastings algorithm and that is why it is usefull
 #' to consider generating several chains all together (\code{N > 1}).
 #' 
