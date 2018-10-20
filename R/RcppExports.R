@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 getLPA <- function(x, iv, Nppp, lmax) {
-    .Call('mistral_getLPA', PACKAGE = 'mistral', x, iv, Nppp, lmax)
+    .Call('_mistral_getLPA', PACKAGE = 'mistral', x, iv, Nppp, lmax)
 }
 

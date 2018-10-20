@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // getLPA
 NumericMatrix getLPA(const NumericVector x, const IntegerVector iv, const int Nppp, const int lmax);
-RcppExport SEXP mistral_getLPA(SEXP xSEXP, SEXP ivSEXP, SEXP NpppSEXP, SEXP lmaxSEXP) {
+RcppExport SEXP _mistral_getLPA(SEXP xSEXP, SEXP ivSEXP, SEXP NpppSEXP, SEXP lmaxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -18,4 +18,14 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(getLPA(x, iv, Nppp, lmax));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_mistral_getLPA", (DL_FUNC) &_mistral_getLPA, 4},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_mistral(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }
