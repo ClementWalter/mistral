@@ -4,8 +4,13 @@
 \alias{updateSd}
 \title{UpdateSd}
 \usage{
-updateSd(X.new, integration.points.oldsd, model, precalc.data,
-  integration.points)
+updateSd(
+  X.new,
+  integration.points.oldsd,
+  model,
+  precalc.data,
+  integration.points
+)
 }
 \arguments{
 \item{X.new}{the d x N matrix containing the points added to the model for

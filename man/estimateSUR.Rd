@@ -4,10 +4,21 @@
 \alias{estimateSUR}
 \title{EstimateSUR}
 \usage{
-estimateSUR(PPP, xi_PPP_X, integrated = TRUE, N_ppp, method = "discrete",
-  SUR_pop, r = N.batch, optimcontrol = list(pop.size = 50 * d,
-  max.generations = 10 * d), approx.pnorm, J = 0,
-  N.batch = foreach::getDoParWorkers(), verbose = 0, ...)
+estimateSUR(
+  PPP,
+  xi_PPP_X,
+  integrated = TRUE,
+  N_ppp,
+  method = "discrete",
+  SUR_pop,
+  r = N.batch,
+  optimcontrol = list(pop.size = 50 * d, max.generations = 10 * d),
+  approx.pnorm,
+  J = 0,
+  N.batch = foreach::getDoParWorkers(),
+  verbose = 0,
+  ...
+)
 }
 \arguments{
 \item{PPP}{the Poisson point process generated to get alpha.}

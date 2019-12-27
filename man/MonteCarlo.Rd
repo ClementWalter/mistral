@@ -4,10 +4,19 @@
 \alias{MonteCarlo}
 \title{Crude Monte Carlo method}
 \usage{
-MonteCarlo(dimension, lsf, N_max = 5e+05,
-  N_batch = foreach::getDoParWorkers(), q = 0, lower.tail = TRUE,
-  precision = 0.05, plot = FALSE, output_dir = NULL, save.X = TRUE,
-  verbose = 0)
+MonteCarlo(
+  dimension,
+  lsf,
+  N_max = 5e+05,
+  N_batch = foreach::getDoParWorkers(),
+  q = 0,
+  lower.tail = TRUE,
+  precision = 0.05,
+  plot = FALSE,
+  output_dir = NULL,
+  save.X = TRUE,
+  verbose = 0
+)
 }
 \arguments{
 \item{dimension}{the dimension of the input space.}

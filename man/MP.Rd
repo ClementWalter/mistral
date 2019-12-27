@@ -5,10 +5,22 @@
 \alias{LPA}
 \title{Moving Particles}
 \usage{
-MP(dimension, lsf, N = 100, N.batch = foreach::getDoParWorkers(), p, q,
-  lower.tail = TRUE, Niter_1fold, alpha = 0.05,
-  compute_confidence = FALSE, verbose = 0, chi2 = FALSE,
-  breaks = N.batch/5, ...)
+MP(
+  dimension,
+  lsf,
+  N = 100,
+  N.batch = foreach::getDoParWorkers(),
+  p,
+  q,
+  lower.tail = TRUE,
+  Niter_1fold,
+  alpha = 0.05,
+  compute_confidence = FALSE,
+  verbose = 0,
+  chi2 = FALSE,
+  breaks = N.batch/5,
+  ...
+)
 }
 \arguments{
 \item{dimension}{the dimension of the input space.}

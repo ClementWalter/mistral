@@ -4,16 +4,44 @@
 \alias{MetaIS}
 \title{Metamodel based Impotance Sampling}
 \usage{
-MetaIS(dimension, lsf, N = 5e+05, N_alpha = 100, N_DOE = 10 * dimension,
-  N1 = N_DOE * 30, Ru = 8, Nmin = 30, Nmax = 200, Ncall_max = 1000,
-  precision = 0.05, N_seeds = 2 * dimension, Niter_seed = Inf,
-  N_alphaLOO = 5000, K_alphaLOO = 1, alpha_int = c(0.1, 10),
-  k_margin = 1.96, lower.tail = TRUE, X = NULL, y = NULL, failure = 0,
-  meta_model = NULL, kernel = "matern5_2", learn_each_train = TRUE,
-  limit_fun_MH = NULL, failure_MH = 0, sampling_strategy = "MH",
-  seeds = NULL, seeds_eval = limit_fun_MH(seeds), burnin = 20,
-  compute.PPP = FALSE, plot = FALSE, limited_plot = FALSE, add = FALSE,
-  output_dir = NULL, verbose = 0)
+MetaIS(
+  dimension,
+  lsf,
+  N = 5e+05,
+  N_alpha = 100,
+  N_DOE = 10 * dimension,
+  N1 = N_DOE * 30,
+  Ru = 8,
+  Nmin = 30,
+  Nmax = 200,
+  Ncall_max = 1000,
+  precision = 0.05,
+  N_seeds = 2 * dimension,
+  Niter_seed = Inf,
+  N_alphaLOO = 5000,
+  K_alphaLOO = 1,
+  alpha_int = c(0.1, 10),
+  k_margin = 1.96,
+  lower.tail = TRUE,
+  X = NULL,
+  y = NULL,
+  failure = 0,
+  meta_model = NULL,
+  kernel = "matern5_2",
+  learn_each_train = TRUE,
+  limit_fun_MH = NULL,
+  failure_MH = 0,
+  sampling_strategy = "MH",
+  seeds = NULL,
+  seeds_eval = limit_fun_MH(seeds),
+  burnin = 20,
+  compute.PPP = FALSE,
+  plot = FALSE,
+  limited_plot = FALSE,
+  add = FALSE,
+  output_dir = NULL,
+  verbose = 0
+)
 }
 \arguments{
 \item{dimension}{of the input space}

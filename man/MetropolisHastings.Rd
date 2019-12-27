@@ -4,9 +4,18 @@
 \alias{MetropolisHastings}
 \title{The modified Metropolis-Hastings algorithm}
 \usage{
-MetropolisHastings(x0, eval_x0 = -1, chain_length, modified = TRUE,
-  sigma = 0.3, proposal = "Uniform", lambda = 1, limit_fun = function(x)
-  {     -1 }, burnin = 20, thinning = 4)
+MetropolisHastings(
+  x0,
+  eval_x0 = -1,
+  chain_length,
+  modified = TRUE,
+  sigma = 0.3,
+  proposal = "Uniform",
+  lambda = 1,
+  limit_fun = function(x) {     -1 },
+  burnin = 20,
+  thinning = 4
+)
 }
 \arguments{
 \item{x0}{the starting point of the Markov chain}

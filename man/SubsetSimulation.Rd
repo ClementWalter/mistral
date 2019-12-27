@@ -6,10 +6,23 @@
 \alias{subset}
 \title{Subset Simulation Monte Carlo}
 \usage{
-SubsetSimulation(dimension, lsf, p_0 = 0.1, N = 10000, q = 0,
-  lower.tail = TRUE, K, thinning = 20, save.all = FALSE, plot = FALSE,
-  plot.level = 5, plot.lsf = TRUE, output_dir = NULL, plot.lab = c("x",
-  "y"), verbose = 0)
+SubsetSimulation(
+  dimension,
+  lsf,
+  p_0 = 0.1,
+  N = 10000,
+  q = 0,
+  lower.tail = TRUE,
+  K,
+  thinning = 20,
+  save.all = FALSE,
+  plot = FALSE,
+  plot.level = 5,
+  plot.lsf = TRUE,
+  output_dir = NULL,
+  plot.lab = c("x", "y"),
+  verbose = 0
+)
 }
 \arguments{
 \item{dimension}{the dimension of the input space.}
@@ -108,7 +121,7 @@ C++ codes for example) and/or parallel computation; see examples in \link{MonteC
 # Compare SubsetSimulation with MP
 \dontrun{
 p <- res[[3]]$p # get a reference value for p
-p_0 <- 0.1 # the default value recommended by Au \\& Beck
+p_0 <- 0.1 # the default value recommended by Au \& Beck
 N_mp <- 100
 # to get approxumately the same number of calls to the lsf
 N_ss <- ceiling(N_mp*log(p)/log(p_0))

@@ -4,8 +4,18 @@
 \alias{S2MART}
 \title{Subset by Support vector Margin Algorithm for Reliability esTimation}
 \usage{
-S2MART(dimension, lsf, Nn = 100, alpha_quantile = 0.1, failure = 0,
-  lower.tail = TRUE, ..., plot = FALSE, output_dir = NULL, verbose = 0)
+S2MART(
+  dimension,
+  lsf,
+  Nn = 100,
+  alpha_quantile = 0.1,
+  failure = 0,
+  lower.tail = TRUE,
+  ...,
+  plot = FALSE,
+  output_dir = NULL,
+  verbose = 0
+)
 }
 \arguments{
 \item{dimension}{the dimension of the input space}

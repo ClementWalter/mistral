@@ -4,16 +4,40 @@
 \alias{SMART}
 \title{Support-vector Margin Algoritm for Reliability esTimation}
 \usage{
-SMART(dimension, lsf, N1 = 10000, N2 = 50000, N3 = 2e+05, Nu = 50,
-  lambda1 = 7, lambda2 = 3.5, lambda3 = 1, tune_cost = c(1, 10, 100,
-  1000), tune_gamma = c(0.5, 0.2, 0.1, 0.05, 0.02, 0.01),
-  clusterInMargin = TRUE, alpha_margin = 1, k1 = round(6 *
-  (dimension/2)^(0.2)), k2 = round(12 * (dimension/2)^(0.2)), k3 = k2 + 16,
-  X = NULL, y = NULL, failure = 0, limit_fun_MH = NULL,
-  sampling_strategy = "MH", seeds = NULL, seeds_eval = NULL,
-  burnin = 20, thinning = 4, plot = FALSE, limited_plot = FALSE,
-  add = FALSE, output_dir = NULL, z_MH = NULL, z_lsf = NULL,
-  verbose = 0)
+SMART(
+  dimension,
+  lsf,
+  N1 = 10000,
+  N2 = 50000,
+  N3 = 2e+05,
+  Nu = 50,
+  lambda1 = 7,
+  lambda2 = 3.5,
+  lambda3 = 1,
+  tune_cost = c(1, 10, 100, 1000),
+  tune_gamma = c(0.5, 0.2, 0.1, 0.05, 0.02, 0.01),
+  clusterInMargin = TRUE,
+  alpha_margin = 1,
+  k1 = round(6 * (dimension/2)^(0.2)),
+  k2 = round(12 * (dimension/2)^(0.2)),
+  k3 = k2 + 16,
+  X = NULL,
+  y = NULL,
+  failure = 0,
+  limit_fun_MH = NULL,
+  sampling_strategy = "MH",
+  seeds = NULL,
+  seeds_eval = NULL,
+  burnin = 20,
+  thinning = 4,
+  plot = FALSE,
+  limited_plot = FALSE,
+  add = FALSE,
+  output_dir = NULL,
+  z_MH = NULL,
+  z_lsf = NULL,
+  verbose = 0
+)
 }
 \arguments{
 \item{dimension}{the dimension of the input space}

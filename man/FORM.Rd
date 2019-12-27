@@ -4,9 +4,19 @@
 \alias{FORM}
 \title{First-order reliability method}
 \usage{
-FORM(dimension, lsf, u.dep = rep(0, dimension), N.calls = 100,
-  eps = 1e-07, Method = "HLRF", IS = FALSE, IS.ratio = 0.5,
-  plot = FALSE, plot.lsf = FALSE, plot.lab = c("x_1", "x_2"))
+FORM(
+  dimension,
+  lsf,
+  u.dep = rep(0, dimension),
+  N.calls = 100,
+  eps = 1e-07,
+  Method = "HLRF",
+  IS = FALSE,
+  IS.ratio = 0.5,
+  plot = FALSE,
+  plot.lsf = FALSE,
+  plot.lab = c("x_1", "x_2")
+)
 }
 \arguments{
 \item{dimension}{the dimension of the input space.}

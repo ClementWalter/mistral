@@ -4,14 +4,35 @@
 \alias{BMP}
 \title{Bayesian Moving Particles}
 \usage{
-BMP(dimension, lsf, q, N = 1000, N.final = N, N.iter = 30,
-  adaptive = FALSE, N.DoE = 5 * dimension, firstDoE = "uniform",
-  radius = qnorm(1e-10, lower.tail = FALSE), X, y, covariance = NULL,
-  learn_each_train = Inf, km.param = list(nugget.estim = TRUE, multistart =
-  1, optim.method = "BFGS", coef.trend = q), burnin = 20, fast = TRUE,
+BMP(
+  dimension,
+  lsf,
+  q,
+  N = 1000,
+  N.final = N,
+  N.iter = 30,
+  adaptive = FALSE,
+  N.DoE = 5 * dimension,
+  firstDoE = "uniform",
+  radius = qnorm(1e-10, lower.tail = FALSE),
+  X,
+  y,
+  covariance = NULL,
+  learn_each_train = Inf,
+  km.param = list(nugget.estim = TRUE, multistart = 1, optim.method = "BFGS", coef.trend
+    = q),
+  burnin = 20,
+  fast = TRUE,
   sur = list(integrated = TRUE, r = 1, approx.pnorm = FALSE),
-  lower.tail = TRUE, save.dir, plot = FALSE, plot.lsf = TRUE,
-  plot.lab = c("x_1", "x_2"), chi2 = FALSE, verbose = 1, breaks)
+  lower.tail = TRUE,
+  save.dir,
+  plot = FALSE,
+  plot.lsf = TRUE,
+  plot.lab = c("x_1", "x_2"),
+  chi2 = FALSE,
+  verbose = 1,
+  breaks
+)
 }
 \arguments{
 \item{dimension}{the dimension of the input space.}

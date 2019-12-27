@@ -16,6 +16,6 @@ License: CeCILL
 NeedsCompilation: yes
 Repository: CRAN
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 7.0.2
 Packaged: 2016-11-22 21:47:54 UTC; clementwalter
 VignetteBuilder: knitr, rmarkdown

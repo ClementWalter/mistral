@@ -6,10 +6,25 @@
 \alias{TPA}
 \title{Increasing Randow Walk}
 \usage{
-IRW(dimension, lsf, N = 10, q = Inf, Nevent = Inf, X, y = lsf(X), K,
-  burnin = 20, sigma = 0.3, last.return = TRUE, use.potential = TRUE,
-  plot = FALSE, plot.lsf = FALSE, print_plot = FALSE, output_dir = NULL,
-  plot.lab = c("x_1", "x_2"))
+IRW(
+  dimension,
+  lsf,
+  N = 10,
+  q = Inf,
+  Nevent = Inf,
+  X,
+  y = lsf(X),
+  K,
+  burnin = 20,
+  sigma = 0.3,
+  last.return = TRUE,
+  use.potential = TRUE,
+  plot = FALSE,
+  plot.lsf = FALSE,
+  print_plot = FALSE,
+  output_dir = NULL,
+  plot.lab = c("x_1", "x_2")
+)
 }
 \arguments{
 \item{dimension}{dimension of the input space.}

@@ -5,14 +5,37 @@
 \title{Active learning reliability method combining Kriging and Monte Carlo
 Simulation}
 \usage{
-AKMCS(dimension, lsf, N = 5e+05, N1 = 10 * dimension, Nmax = 200,
-  Nmin = 2, X = NULL, y = NULL, failure = 0, precision = 0.05,
-  bayesian = TRUE, compute.PPP = FALSE, meta_model = NULL,
-  kernel = "matern5_2", learn_each_train = TRUE, crit_min = 2,
-  lower.tail = TRUE, limit_fun_MH = NULL, failure_MH = 0,
-  sampling_strategy = "MH", first_DOE = "Gaussian", seeds = NULL,
-  seeds_eval = limit_fun_MH(seeds), burnin = 30, plot = FALSE,
-  limited_plot = FALSE, add = FALSE, output_dir = NULL, verbose = 0)
+AKMCS(
+  dimension,
+  lsf,
+  N = 5e+05,
+  N1 = 10 * dimension,
+  Nmax = 200,
+  Nmin = 2,
+  X = NULL,
+  y = NULL,
+  failure = 0,
+  precision = 0.05,
+  bayesian = TRUE,
+  compute.PPP = FALSE,
+  meta_model = NULL,
+  kernel = "matern5_2",
+  learn_each_train = TRUE,
+  crit_min = 2,
+  lower.tail = TRUE,
+  limit_fun_MH = NULL,
+  failure_MH = 0,
+  sampling_strategy = "MH",
+  first_DOE = "Gaussian",
+  seeds = NULL,
+  seeds_eval = limit_fun_MH(seeds),
+  burnin = 30,
+  plot = FALSE,
+  limited_plot = FALSE,
+  add = FALSE,
+  output_dir = NULL,
+  verbose = 0
+)
 }
 \arguments{
 \item{dimension}{dimension of the input space.}
