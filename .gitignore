@@ -8,3 +8,5 @@ src/*.dll
 figure/
 cache/
 .DS_Store
+vignettes
+!vignettes/*.Rmd
